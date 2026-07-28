@@ -737,20 +737,34 @@
         .days-header {
             position: sticky;
             top: 0;
-            background: white;
+            left: 0;
+            width: 800px;
             height: 40px;
-            z-index: 3;
-            border-bottom: 1px solid #ccc;
-            margin-bottom: 10px;
+            background-color: #2c3e50;
+            color: white;
+            z-index: 10;
             display: flex;
             align-items: center;
-            padding-left: 60px;
+            border-bottom: 2px solid #1a252f;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            user-select: none;
+            box-sizing: border-box;
+        }
+        .days-header .time-spacer {
+            width: 60px;
+            flex-shrink: 0;
         }
         .days-header .day {
             width: 100px;
             text-align: center;
             font-weight: bold;
             font-size: 14px;
+            flex-shrink: 0;
+            border-right: 1px solid rgba(255, 255, 255, 0.15);
+            box-sizing: border-box;
+        }
+        .days-header .day:last-of-type {
+            border-right: none;
         }
     </style>
 </head>
@@ -784,6 +798,16 @@
                     </div>
                 </div>
                 <div id="timelineContainer">
+                    <div class="days-header">
+                        <div class="time-spacer"></div>
+                        <div class="day">월</div>
+                        <div class="day">화</div>
+                        <div class="day">수</div>
+                        <div class="day">목</div>
+                        <div class="day">금</div>
+                        <div class="day">토</div>
+                        <div class="day">일</div>
+                    </div>
                     <canvas id="timeline"></canvas>
                     <div id="scheduleContainer"></div>
                 </div>
@@ -919,15 +943,6 @@
             // 배경을 흰색으로 설정
             ctx.fillStyle = 'white';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            // 요일 표시
-            ctx.font = 'bold 14px Arial';
-            ctx.textAlign = 'center';
-            ctx.fillStyle = '#000';
-            days.forEach((day, index) => {
-                const x = timelineX + columnWidth * index + columnWidth/2 + 10;
-                ctx.fillText(day, x, 25);
-            });
 
             // 시간 표시 및 가로선
             ctx.font = '12px Arial';
