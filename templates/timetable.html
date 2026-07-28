@@ -973,6 +973,7 @@
 
             // 시간 표시 및 가로선
             ctx.font = '12px Arial';
+            ctx.fillStyle = '#333333';
             for (let hour = startHour; hour <= endHour; hour++) {
                 const y = hour * hourHeight + topMargin;
                 const rightX = timelineX + columnWidth * days.length + 10;

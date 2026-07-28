@@ -13,6 +13,7 @@ class User(models.Model):
 
 
 class Subject(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, db_column='userID', related_name='subjects', null=True, blank=True)
     subjectName = models.CharField(max_length=50, db_column='subjectName')
     tag = models.CharField(max_length=200, blank=True, null=True, db_column='tag')
 

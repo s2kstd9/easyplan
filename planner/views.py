@@ -201,8 +201,12 @@ def get_time_tables(request, time_table_list_id):
 
 @csrf_exempt
 def api_subjects(request):
+    user = get_current_user(request)
+    if not user:
+        return JsonResponse({'error': 'Unauthorized'}, status=401)
+
     if request.method == 'GET':
-        subjects = Subject.objects.all()
+        subjects = Subject.objects.filter(models.Q(user=user) | models.Q(user__isnull=True))
         return JsonResponse([{'id': s.id, 'subjectName': s.subjectName, 'tag': s.tag or ''} for s in subjects], safe=False)
 
     elif request.method == 'POST':
@@ -211,17 +215,26 @@ def api_subjects(request):
             subject_name = data.get('subjectName')
             if not subject_name:
                 return JsonResponse({'error': '과목명이 필요합니다'}, status=400)
-            new_subject = Subject.objects.create(subjectName=subject_name)
+            
+            existing = Subject.objects.filter(user=user, subjectName=subject_name).first()
+            if existing:
+                return JsonResponse({'message': '이미 존재하는 과목입니다', 'id': existing.id}, status=200)
+
+            new_subject = Subject.objects.create(subjectName=subject_name, user=user)
             return JsonResponse({'message': '과목이 추가되었습니다', 'id': new_subject.id}, status=201)
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
 
-    return JsonResponse({'error': 'Method not allowed'}, status=45)
+    return JsonResponse({'error': 'Method not allowed'}, status=405)
 
 
 @csrf_exempt
 def api_subject_detail(request, subject_id):
-    subject = get_object_or_404(Subject, id=subject_id)
+    user = get_current_user(request)
+    if not user:
+        return JsonResponse({'error': 'Unauthorized'}, status=401)
+
+    subject = get_object_or_404(Subject, models.Q(id=subject_id) & (models.Q(user=user) | models.Q(user__isnull=True)))
 
     if request.method == 'PUT':
         try:
@@ -230,6 +243,8 @@ def api_subject_detail(request, subject_id):
             if not subject_name:
                 return JsonResponse({'error': '과목명이 필요합니다'}, status=400)
             subject.subjectName = subject_name
+            if subject.user is None:
+                subject.user = user
             subject.save()
             return JsonResponse({'message': '과목이 수정되었습니다'}, status=200)
         except Exception as e:
@@ -263,8 +278,14 @@ def check_subject_usage(request, subject_id):
 
 @csrf_exempt
 def api_items(request):
+    user = get_current_user(request)
+    if not user:
+        return JsonResponse({'error': 'Unauthorized'}, status=401)
+
     if request.method == 'GET':
-        items = Item.objects.all().select_related('subject').prefetch_related('scopes')
+        items = Item.objects.filter(
+            models.Q(subject__user=user) | models.Q(subject__user__isnull=True)
+        ).select_related('subject').prefetch_related('scopes')
         result = []
         for i in items:
             result.append({
@@ -289,7 +310,7 @@ def api_items(request):
             
             if not item_name:
                 return JsonResponse({'error': '학습항목명을 입력해주세요.'}, status=400)
-            if not sub_id or not Subject.objects.filter(id=sub_id).exists():
+            if not sub_id or not Subject.objects.filter(models.Q(id=sub_id) & (models.Q(user=user) | models.Q(user__isnull=True))).exists():
                 return JsonResponse({'error': '유효한 과목을 선택해주세요.'}, status=400)
 
             new_item = Item.objects.create(
