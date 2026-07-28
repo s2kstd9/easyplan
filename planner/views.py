@@ -8,6 +8,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.hashers import make_password, check_password
 from werkzeug.security import check_password_hash, generate_password_hash
 
+from django.db import models
+from django.db.models import Q
 from .models import User, Subject, Scope, Item, TimeTable, LearningPlanList, TimeTableList
 
 
@@ -206,7 +208,7 @@ def api_subjects(request):
         return JsonResponse({'error': 'Unauthorized'}, status=401)
 
     if request.method == 'GET':
-        subjects = Subject.objects.filter(models.Q(user=user) | models.Q(user__isnull=True))
+        subjects = Subject.objects.filter(Q(user=user) | Q(user__isnull=True))
         return JsonResponse([{'id': s.id, 'subjectName': s.subjectName, 'tag': s.tag or ''} for s in subjects], safe=False)
 
     elif request.method == 'POST':
@@ -216,7 +218,7 @@ def api_subjects(request):
             if not subject_name:
                 return JsonResponse({'error': '과목명이 필요합니다'}, status=400)
             
-            existing = Subject.objects.filter(models.Q(user=user) | models.Q(user__isnull=True), subjectName=subject_name).first()
+            existing = Subject.objects.filter(Q(user=user) | Q(user__isnull=True), subjectName=subject_name).first()
             if existing:
                 if existing.user is None:
                     existing.user = user
@@ -238,7 +240,7 @@ def api_subject_detail(request, subject_id):
     if not user:
         return JsonResponse({'error': 'Unauthorized'}, status=401)
 
-    subject = get_object_or_404(Subject, models.Q(id=subject_id) & (models.Q(user=user) | models.Q(user__isnull=True)))
+    subject = get_object_or_404(Subject, Q(id=subject_id) & (Q(user=user) | Q(user__isnull=True)))
 
     if request.method == 'PUT':
         try:
@@ -288,7 +290,7 @@ def api_items(request):
 
     if request.method == 'GET':
         items = Item.objects.filter(
-            models.Q(subject__user=user) | models.Q(subject__user__isnull=True)
+            Q(subject__user=user) | Q(subject__user__isnull=True)
         ).select_related('subject').prefetch_related('scopes')
         result = []
         for i in items:
@@ -314,7 +316,7 @@ def api_items(request):
             
             if not item_name:
                 return JsonResponse({'error': '학습항목명을 입력해주세요.'}, status=400)
-            if not sub_id or not Subject.objects.filter(models.Q(id=sub_id) & (models.Q(user=user) | models.Q(user__isnull=True))).exists():
+            if not sub_id or not Subject.objects.filter(Q(id=sub_id) & (Q(user=user) | Q(user__isnull=True))).exists():
                 return JsonResponse({'error': '유효한 과목을 선택해주세요.'}, status=400)
 
             new_item = Item.objects.create(
