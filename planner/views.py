@@ -95,6 +95,28 @@ def login_view(request):
     return render(request, 'login.html')
 
 
+DEFAULT_SUBJECTS = [
+    '국어', '수학', '사회', '과학', '영어',
+    '음악', '미술', '실과', '기가', '기술',
+    '가정', '정보', '한문'
+]
+
+
+def create_default_subjects_for_user(user):
+    if not user:
+        return
+    existing_subject_names = set(
+        Subject.objects.filter(user=user).values_list('subjectName', flat=True)
+    )
+    subjects_to_create = [
+        Subject(subjectName=sub_name, user=user)
+        for sub_name in DEFAULT_SUBJECTS
+        if sub_name not in existing_subject_names
+    ]
+    if subjects_to_create:
+        Subject.objects.bulk_create(subjects_to_create)
+
+
 def signup_view(request):
     if request.method == 'POST':
         userName = request.POST.get('userName')
@@ -111,6 +133,7 @@ def signup_view(request):
 
         hashed_password = generate_password_hash(userPW, method='pbkdf2:sha256')
         user = User.objects.create(userName=userName, userPW=hashed_password, userEmail=userEmail)
+        create_default_subjects_for_user(user)
         return redirect('login')
 
     return render(request, 'signup.html')
@@ -210,6 +233,9 @@ def api_subjects(request):
 
     if request.method == 'GET':
         subjects = Subject.objects.filter(Q(user=user) | Q(user__isnull=True))
+        if not subjects.exists():
+            create_default_subjects_for_user(user)
+            subjects = Subject.objects.filter(Q(user=user) | Q(user__isnull=True))
         return JsonResponse([{'id': s.id, 'subjectName': s.subjectName, 'tag': s.tag or ''} for s in subjects], safe=False)
 
     elif request.method == 'POST':
