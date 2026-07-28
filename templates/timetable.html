@@ -1563,7 +1563,6 @@
         window.addEventListener('DOMContentLoaded', async () => {
             await loadSubjects();
             await loadItems();
-            await loadTimeTable();
         });
 
         // 과목 데이터 로드
@@ -2385,10 +2384,14 @@
 
         // Load time table when a time table list is selected
         async function loadTimeTable(timeTableListId) {
+            if (!timeTableListId) return;
             try {
                 const response = await fetch(`/api/time_tables/${timeTableListId}`);
+                if (!response.ok) return;
                 const timeTables = await response.json();
-                displayTimeTable(timeTables);
+                if (Array.isArray(timeTables)) {
+                    displayTimeTable(timeTables);
+                }
             } catch (error) {
                 console.error('시간표 로드 실패:', error);
             }
