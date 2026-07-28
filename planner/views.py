@@ -61,7 +61,8 @@ def login_required_custom(view_func):
 
 
 def root(request):
-    return redirect('home')
+    user = get_current_user(request)
+    return render(request, 'landing.html', {'current_user': user})
 
 
 def home(request):
