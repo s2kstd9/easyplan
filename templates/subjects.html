@@ -390,34 +390,53 @@
             '체육': '#1ABC9C',
             '실과': '#E67E22',
             '한문': '#B8860B',
-            '한자': '#B8860B',
-            '물리': '#E74C3C',
-            '화학': '#F1C40F',
-            '생명과학': '#27AE60',
-            '지구과학': '#3498DB',
-            '역사': '#8B4513',
-            '도덕': '#95A5A6',
-            '제2외국어': '#16A085'
+            '한자': '#B8860B'
         };
 
-        const defaultPalette = [
-            '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFB347', '#96CEB4',
-            '#9B59B6', '#F39C12', '#34495E', '#FF7F50', '#D35400',
-            '#8E44AD', '#2ECC71', '#E67E22', '#1ABC9C', '#3498DB',
-            '#E74C3C', '#F1C40F', '#B8860B', '#16A085', '#8B4513'
+        // 기본 과목과 겹치지 않는 커스텀 전용 파스텔 색상 팔레트
+        const customPalette = [
+            '#E84393', '#00CEC9', '#6C5CE7', '#FDCB6E', '#00B894',
+            '#E17055', '#0984E3', '#A29BFE', '#FD79A8', '#55E6C1',
+            '#F8C291', '#6A89CC', '#82CCDD', '#B8E994', '#F6B93B',
+            '#E55039', '#4A69BD', '#78E08F', '#FA983A', '#38ADA9'
         ];
+
+        // 과목별 할당된 색상 캐시
+        const assignedSubjectColors = {};
 
         function getSubjectColor(subjectName) {
             if (!subjectName) return '#45B7D1';
+
+            // 1. 기본 과목 고유 색상 매핑
             if (subjectColorMap[subjectName]) {
                 return subjectColorMap[subjectName];
             }
-            let hash = 0;
-            for (let i = 0; i < subjectName.length; i++) {
-                hash = subjectName.charCodeAt(i) + ((hash << 5) - hash);
+
+            // 2. 이미 캐시된 색상이 있는 경우
+            if (assignedSubjectColors[subjectName]) {
+                return assignedSubjectColors[subjectName];
             }
-            const index = Math.abs(hash) % defaultPalette.length;
-            return defaultPalette[index];
+
+            // 3. 현재 사용 중인 모든 색상 집합 수집
+            const usedColors = new Set(
+                Object.values(subjectColorMap).concat(Object.values(assignedSubjectColors))
+            );
+
+            // 4. customPalette에서 기존 과목과 중복되지 않는 미사용 첫 번째 색상 선택
+            let chosenColor = customPalette.find(color => !usedColors.has(color));
+
+            // 5. customPalette 색상이 모두 사용되었으면 Golden Ratio HSL로 고유 색상 자동 생성
+            if (!chosenColor) {
+                let hash = 0;
+                for (let i = 0; i < subjectName.length; i++) {
+                    hash = subjectName.charCodeAt(i) + ((hash << 5) - hash);
+                }
+                const hue = (Math.abs(hash) * 137.508) % 360;
+                chosenColor = `hsl(${Math.round(hue)}, 70%, 60%)`;
+            }
+
+            assignedSubjectColors[subjectName] = chosenColor;
+            return chosenColor;
         }
 
         // 과목 수정 모달 열기
