@@ -284,9 +284,17 @@ def api_items(request):
     elif request.method == 'POST':
         try:
             data = json.loads(request.body)
+            item_name = data.get('itemName')
+            sub_id = data.get('subId')
+            
+            if not item_name:
+                return JsonResponse({'error': '학습항목명을 입력해주세요.'}, status=400)
+            if not sub_id or not Subject.objects.filter(id=sub_id).exists():
+                return JsonResponse({'error': '유효한 과목을 선택해주세요.'}, status=400)
+
             new_item = Item.objects.create(
-                itemName=data['itemName'],
-                subject_id=data['subId'],
+                itemName=item_name,
+                subject_id=sub_id,
                 tag=data.get('tag', '')
             )
             for scope_data in data.get('scopes', []):
@@ -309,8 +317,16 @@ def api_item_detail(request, item_id):
     if request.method == 'PUT':
         try:
             data = json.loads(request.body)
-            item.itemName = data['itemName']
-            item.subject_id = data['subId']
+            item_name = data.get('itemName')
+            sub_id = data.get('subId')
+
+            if not item_name:
+                return JsonResponse({'error': '학습항목명을 입력해주세요.'}, status=400)
+            if not sub_id or not Subject.objects.filter(id=sub_id).exists():
+                return JsonResponse({'error': '유효한 과목을 선택해주세요.'}, status=400)
+
+            item.itemName = item_name
+            item.subject_id = sub_id
             item.tag = data.get('tag', '')
             item.save()
 

@@ -1593,6 +1593,13 @@
         function populateSubjectSelect() {
             const select = document.getElementById('subjectSelect');
             select.innerHTML = '';
+            if (!subjects || subjects.length === 0) {
+                const option = document.createElement('option');
+                option.value = '';
+                option.textContent = '-- 선택 가능한 과목 없음 (과목 등록 필요) --';
+                select.appendChild(option);
+                return;
+            }
             subjects.forEach(subject => {
                 const option = document.createElement('option');
                 option.value = subject.id;
@@ -1985,9 +1992,15 @@
                     return { begin, end };
                 });
                 
+                const subjectVal = document.getElementById('subjectSelect').value;
+                const parsedSubId = parseInt(subjectVal);
+                if (!subjectVal || isNaN(parsedSubId)) {
+                    throw new Error('선택된 과목이 없습니다. 과목을 먼저 추가해주세요.');
+                }
+
                 const itemData = {
                     itemName: document.getElementById('itemName').value,
-                    subId: parseInt(document.getElementById('subjectSelect').value),
+                    subId: parsedSubId,
                     scopes: scopes,
                     tag: document.getElementById('itemTag').value
                 };
@@ -2028,11 +2041,16 @@
                         showNotificationModal('학습항목이 수정되었습니다.');
                     }
                 } else {
-                    throw new Error('저장 실패');
+                    const errData = await response.json().catch(() => ({}));
+                    throw new Error(errData.error || '저장에 실패했습니다.');
                 }
             } catch (error) {
                 console.error('저장 실패:', error);
-                showNotificationModal(error.message || '저장에 실패했습니다.');
+                let msg = error.message || '저장에 실패했습니다.';
+                if (msg === 'Failed to fetch') {
+                    msg = '서버 통신 실패 (Failed to fetch): Django 서버(http://127.0.0.1:8000)가 실행 중인지 확인해주세요.';
+                }
+                showNotificationModal(msg);
             }
         });
 
