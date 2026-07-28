@@ -67,6 +67,90 @@
 				object-fit: cover !important;
 			}
 		}
+
+		/* 랜딩 페이지 로그인 입력 박스 및 2개 분할 버튼 스타일 */
+		.landing-login-form {
+			margin-top: 1.2rem;
+			width: 100%;
+			max-width: 440px;
+		}
+
+		.login-inputs-row {
+			display: flex;
+			gap: 10px;
+			margin-bottom: 12px;
+			width: 100%;
+		}
+
+		.login-inputs-row input {
+			flex: 1;
+			height: 2.8rem;
+			padding: 0 1rem;
+			background: rgba(255, 255, 255, 0.95);
+			border: 1px solid rgba(0, 0, 0, 0.2);
+			border-radius: 6px;
+			font-size: 0.95rem;
+			color: #333;
+			outline: none;
+			box-sizing: border-box;
+			box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+		}
+
+		.login-inputs-row input:focus {
+			border-color: #47D3E5;
+			background: #ffffff;
+			box-shadow: 0 0 0 2px rgba(71, 211, 229, 0.3);
+		}
+
+		.landing-buttons-row {
+			display: flex;
+			gap: 10px;
+			width: 100%;
+		}
+
+		.landing-buttons-row .button {
+			flex: 1;
+			text-align: center;
+			padding: 0 0.8rem;
+			height: 3rem;
+			line-height: 3rem;
+			font-size: 1.05rem;
+			font-weight: 600;
+			border-radius: 6px;
+			margin: 0 !important;
+		}
+
+		@media screen and (orientation: portrait), screen and (max-width: 736px) {
+			.landing-login-form {
+				margin-top: 0.6rem;
+				max-width: 100%;
+			}
+
+			.login-inputs-row {
+				display: flex;
+				flex-direction: row;
+				gap: 8px;
+				margin-bottom: 8px;
+			}
+
+			.login-inputs-row input {
+				height: 2.4rem;
+				padding: 0 0.7rem;
+				font-size: 0.85rem;
+			}
+
+			.landing-buttons-row {
+				display: flex;
+				flex-direction: row;
+				gap: 8px;
+			}
+
+			.landing-buttons-row .button {
+				height: 2.6rem;
+				line-height: 2.6rem;
+				font-size: 0.92rem;
+			}
+		}
 	</style>
 </head>
 
@@ -82,9 +166,19 @@
 				<h1>BLP</h1>
 				<p class="major">배추벌레 학습계획표</p>
 				<p class="major">이 프로그램은 학습계획을 쉽게 작성하고 출력할 수 있게 도와줍니다.</p>
-				<ul class="actions stacked">
-					<li><a href="/home" class="button big wide smooth-scroll-middle">시작하기</a></li>
-				</ul>
+
+				<form method="POST" action="{% url 'login' %}" class="landing-login-form">
+					{% csrf_token %}
+					<div class="login-inputs-row">
+						<input type="text" name="userName" id="landingUserName" placeholder="사용자 이름" required />
+						<input type="password" name="userPW" id="landingUserPW" placeholder="비밀번호" required />
+					</div>
+
+					<div class="landing-buttons-row">
+						<a href="/home" class="button big wide btn-learner">학습자</a>
+						<a href="/home" class="button big wide btn-planner">계획자</a>
+					</div>
+				</form>
 			</div>
 			<div class="image">
 				<img src="/static/images/planner.jpg" alt="학습계획표 인트로" />
