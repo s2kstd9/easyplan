@@ -159,6 +159,22 @@
 				font-size: 0.88rem !important;
 			}
 		}
+		.signup-link-container {
+			margin-top: 10px !important;
+			font-size: 0.85rem !important;
+			color: #666 !important;
+			text-align: center !important;
+		}
+
+		.signup-link-container a {
+			color: #3498db !important;
+			text-decoration: underline !important;
+			font-weight: 600 !important;
+		}
+
+		.signup-link-container a:hover {
+			color: #2980b9 !important;
+		}
 	</style>
 </head>
 
@@ -177,14 +193,25 @@
 
 				<form method="POST" action="{% url 'login' %}" class="landing-login-form">
 					{% csrf_token %}
+					{% if messages %}
+						<div class="landing-flash-messages" style="color: #e74c3c; font-size: 0.85rem; margin-bottom: 8px; font-weight: 600;">
+							{% for message in messages %}
+								<p style="margin: 0;">{{ message }}</p>
+							{% endfor %}
+						</div>
+					{% endif %}
 					<div class="login-inputs-column">
 						<input type="text" name="userName" id="landingUserName" placeholder="사용자 이름" required />
 						<input type="password" name="userPW" id="landingUserPW" placeholder="비밀번호" required />
 					</div>
 
 					<div class="landing-buttons-row">
-						<a href="/home" class="button btn-learner">학습</a>
-						<a href="/home" class="button btn-planner">계획</a>
+						<button type="submit" name="target" value="select_learning_plan" class="button btn-learner">학습</button>
+						<button type="submit" name="target" value="home" class="button btn-planner">계획</button>
+					</div>
+
+					<div class="signup-link-container">
+						<p style="margin: 0;">계정이 없으신가요? <a href="{% url 'signup' %}">회원가입</a></p>
 					</div>
 				</form>
 			</div>

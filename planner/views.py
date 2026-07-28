@@ -79,6 +79,7 @@ def login_view(request):
     if request.method == 'POST':
         userName = request.POST.get('userName')
         userPW = request.POST.get('userPW')
+        target = request.POST.get('target', 'select_learning_plan')
 
         try:
             user = User.objects.get(userName=userName)
@@ -87,11 +88,14 @@ def login_view(request):
                     user.userPW = generate_password_hash(userPW, method='pbkdf2:sha256')
                     user.save()
                 request.session['user_id'] = user.id
+                create_default_subjects_for_user(user)
+                if target == 'home':
+                    return redirect('home')
                 return redirect('select_learning_plan')
             else:
-                messages.error(request, 'Invalid username or password')
+                messages.error(request, '사용자 이름 또는 비밀번호가 올바르지 않습니다.')
         except User.DoesNotExist:
-            messages.error(request, 'Invalid username or password')
+            messages.error(request, '사용자 이름 또는 비밀번호가 올바르지 않습니다.')
 
     return render(request, 'login.html')
 
