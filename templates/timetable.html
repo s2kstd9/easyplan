@@ -1285,6 +1285,7 @@
             const subject = draggedItem ? draggedItem.getAttribute('data-subject') : '국어';
             const itemName = draggedItem ? draggedItem.getAttribute('data-item-name') : '';
             block.setAttribute('data-subject', subject);
+            block.style.backgroundColor = getSubjectColor(subject);
 
             // 내용을 담을 div 추가
             const content = document.createElement('div');
@@ -1788,7 +1789,16 @@
             '음악': '#D35400',
             '미술': '#8E44AD',
             '체육': '#2ECC71',
-            '실과': '#E67E22'
+            '실과': '#E67E22',
+            '한문': '#1ABC9C',
+            '한자': '#1ABC9C',
+            '물리': '#E74C3C',
+            '화학': '#F1C40F',
+            '생명과학': '#2ECC71',
+            '지구과학': '#3498DB',
+            '역사': '#B8860B',
+            '도덕': '#9B59B6',
+            '제2외국어': '#16A085'
         };
 
         const defaultPalette = [
@@ -2024,6 +2034,7 @@
                 div.setAttribute('data-subject', item.subjectName);
                 div.setAttribute('data-item-name', item.itemName);
                 div.setAttribute('draggable', 'true');
+                div.style.backgroundColor = getSubjectColor(item.subjectName);
 
                 // 더블클릭 이벤트 추가
                 div.addEventListener('dblclick', () => {
