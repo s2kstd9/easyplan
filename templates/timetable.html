@@ -1968,6 +1968,7 @@
         window.addEventListener('DOMContentLoaded', async () => {
             await loadSubjects();
             await loadItems();
+            await loadTimeTableLists();
         });
 
         // 과목 데이터 로드
@@ -2613,10 +2614,23 @@
         }
 
         // 시간표를 타임라인에 표시
-        function displayTimeTable(plans) {
+        async function displayTimeTable(plans) {
+            drawTimelineBase();
+            
             // 기존 블록들 제거
             const existingBlocks = document.querySelectorAll('.schedule-block');
             existingBlocks.forEach(block => block.remove());
+
+            if (!items || items.length === 0) {
+                try {
+                    const res = await fetch('/api/items');
+                    items = await res.json();
+                } catch (e) {
+                    console.error('학습항목 동기화 실패:', e);
+                }
+            }
+
+            if (!plans || !Array.isArray(plans)) return;
 
             plans.forEach(plan => {
                 // 해당하는 학습항목 찾기
@@ -2634,6 +2648,7 @@
                 block.setAttribute('data-item-id', item.id);
                 block.setAttribute('data-subject', item.subjectName);
                 block.setAttribute('data-item-name', item.itemName);
+                block.style.backgroundColor = getSubjectColor(item.subjectName);
 
                 scheduleContainer.appendChild(block);
                 makeResizable(block);
@@ -2727,17 +2742,18 @@
                 const select = document.getElementById('timeTableListSelect');
                 select.innerHTML = '<option value="">시간표 선택</option>';
 
-                timeTableLists.forEach(ttl => {
-                    const option = document.createElement('option');
-                    option.value = ttl.id;
-                    option.textContent = ttl.timeTableName;
-                    select.appendChild(option);
-                });
+                if (Array.isArray(timeTableLists) && timeTableLists.length > 0) {
+                    timeTableLists.forEach(ttl => {
+                        const option = document.createElement('option');
+                        option.value = ttl.id;
+                        option.textContent = ttl.timeTableName;
+                        select.appendChild(option);
+                    });
 
-                // If there's only one time table list, select it automatically
-                if (timeTableLists.length === 1) {
-                    select.value = timeTableLists[0].id;
-                    loadTimeTable(timeTableLists[0].id);
+                    // Automatically select the first timetable by default
+                    const defaultId = select.value || timeTableLists[0].id;
+                    select.value = defaultId;
+                    await loadTimeTable(defaultId);
                 }
             } catch (error) {
                 console.error('시간표 목록 로드 실패:', error);
@@ -2752,7 +2768,7 @@
                 if (!response.ok) return;
                 const timeTables = await response.json();
                 if (Array.isArray(timeTables)) {
-                    displayTimeTable(timeTables);
+                    await displayTimeTable(timeTables);
                 }
             } catch (error) {
                 console.error('시간표 로드 실패:', error);
@@ -2814,9 +2830,6 @@
                 showNotificationModal('저장에 실패했습니다.');
             }
         }
-
-        // Load time table lists when the page loads
-        document.addEventListener('DOMContentLoaded', loadTimeTableLists);
     </script>
 </body>
 
