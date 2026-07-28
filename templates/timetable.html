@@ -2132,15 +2132,7 @@
                 // 학습항목 텍스트 컨테이너
                 const textContent = document.createElement('span');
 
-                // 범위량 합계 계산
-                let totalRange = 0;
-                if (item.scopes && item.scopes.length > 0) {
-                    totalRange = item.scopes.reduce((sum, scope) => {
-                        return sum + (scope.end - scope.begin + 1);
-                    }, 0);
-                }
-
-                textContent.textContent = `${item.itemName} (${item.subjectName}) - ${totalRange}`;
+                textContent.textContent = `${item.itemName} (${item.subjectName})`;
                 div.appendChild(textContent);
 
                 // 삭제 버튼 추가
