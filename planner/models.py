@@ -59,8 +59,9 @@ class LearningPlanList(models.Model):
 
 
 class TimeTableList(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, db_column='userID', related_name='time_table_lists', null=True, blank=True)
     timeTableName = models.CharField(max_length=100, db_column='timeTableName')
-    learning_plan = models.ForeignKey(LearningPlanList, on_delete=models.CASCADE, db_column='learningPlanListID', related_name='time_tables')
+    learning_plan = models.ForeignKey(LearningPlanList, on_delete=models.CASCADE, db_column='learningPlanListID', related_name='time_tables', null=True, blank=True)
     tag = models.CharField(max_length=200, blank=True, null=True, db_column='tag')
 
     class Meta:

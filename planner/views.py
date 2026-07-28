@@ -170,12 +170,13 @@ def get_learning_plans(request):
 @login_required_custom
 def get_time_table_lists(request, learning_plan_id):
     plan = get_object_or_404(LearningPlanList, id=learning_plan_id, user=request.current_user)
-    time_table_lists = list(TimeTableList.objects.filter(learning_plan=plan))
+    time_table_lists = list(TimeTableList.objects.filter(Q(user=request.current_user) | Q(learning_plan=plan)))
 
     if not time_table_lists:
         default_time_table = TimeTableList.objects.create(
             timeTableName="첫번째 기준시간표",
             learning_plan=plan,
+            user=request.current_user,
             tag=""
         )
         time_table_lists = [default_time_table]
@@ -189,7 +190,7 @@ def get_time_table_lists(request, learning_plan_id):
 
 @login_required_custom
 def get_time_tables(request, time_table_list_id):
-    time_table_list = get_object_or_404(TimeTableList, id=time_table_list_id, learning_plan__user=request.current_user)
+    time_table_list = get_object_or_404(TimeTableList, Q(id=time_table_list_id) & (Q(user=request.current_user) | Q(learning_plan__user=request.current_user)))
     time_tables = TimeTable.objects.filter(time_table_list=time_table_list)
     return JsonResponse([{
         'id': tt.id,
@@ -448,7 +449,7 @@ def api_timetable(request):
         if not user:
             return JsonResponse({'error': 'Unauthorized'}, status=401)
 
-        time_table_list = get_object_or_404(TimeTableList, id=timeTableListId, learning_plan__user=user)
+        time_table_list = get_object_or_404(TimeTableList, Q(id=timeTableListId) & (Q(user=user) | Q(learning_plan__user=user)))
         plans = TimeTable.objects.filter(time_table_list=time_table_list)
         return JsonResponse([{
             'id': p.id,
@@ -471,7 +472,7 @@ def api_timetable(request):
             if not user:
                 return JsonResponse({'error': 'Unauthorized'}, status=401)
 
-            time_table_list = get_object_or_404(TimeTableList, id=timeTableListId, learning_plan__user=user)
+            time_table_list = get_object_or_404(TimeTableList, Q(id=timeTableListId) & (Q(user=user) | Q(learning_plan__user=user)))
             TimeTable.objects.filter(time_table_list=time_table_list).delete()
 
             for plan in data:
