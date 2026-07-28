@@ -1,0 +1,142 @@
+{% include 'navbar.html' %}
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>학습계획이</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            min-height: 100vh;
+        }
+
+        /* Navigation Menu Styles */
+        .nav-menu {
+            background-color: #2c3e50;
+            color: white;
+            padding: 0;
+            width: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-menu h2 {
+            margin: 0;
+            padding: 15px 20px;
+            font-size: 1.2em;
+            white-space: nowrap;
+        }
+
+        .nav-menu ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-menu li {
+            position: relative;
+            padding: 0;
+        }
+
+        .nav-menu a {
+            display: block;
+            padding: 15px 20px;
+            color: white;
+            text-decoration: none;
+            transition: background-color 0.3s;
+        }
+
+        .nav-menu a:hover {
+            background-color: #34495e;
+        }
+
+        .nav-menu a.active {
+            background-color: #3498db;
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            padding: 80px 40px 40px;
+        }
+
+        .welcome-section {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .welcome-section h1 {
+            color: #2c3e50;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+
+        .welcome-section p {
+            color: #666;
+            font-size: 1.2em;
+            line-height: 1.6;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .feature-card h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        .feature-card p {
+            color: #666;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="welcome-section">
+            <h1>학습 계획 시스템에 오신 것을 환영합니다</h1>
+            <p>효율적인 학습 계획과 시간 관리를 위한 최적의 솔루션</p>
+        </div>
+
+        <div class="features-grid">
+            <div class="feature-card">
+                <h3>과목 관리</h3>
+                <p>학습 과목을 체계적으로 관리하고 분류할 수 있습니다.</p>
+            </div>
+            <div class="feature-card">
+                <h3>기준 시간표</h3>
+                <p>주간 학습 시간표를 효율적으로 계획하고 관리할 수 있습니다.</p>
+            </div>
+            <div class="feature-card">
+                <h3>학습 계획</h3>
+                <p>장기적인 학습 목표를 설정하고 진행 상황을 추적할 수 있습니다.</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

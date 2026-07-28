@@ -1,0 +1,64 @@
+<nav class="nav-menu">
+    <h2 style="margin:0 20px 0 0;">학습 계획 시스템</h2>
+    <ul>
+        <li><a href="/home" class="nav-link{% if request.path == '/home' or request.path == '/home.html' %} active{% endif %}">홈으로</a></li>
+        <li><a href="/subjects" class="nav-link{% if request.path == '/subjects' %} active{% endif %}">과목 편집</a></li>
+        <li><a href="/timetable" class="nav-link{% if request.path == '/timetable' %} active{% endif %}">기준시간표</a></li>
+        <li><a href="/learning_plan" class="nav-link{% if request.path == '/learning_plan' %} active{% endif %}">학습계획</a></li>
+        <li><a href="/about" class="nav-link{% if request.path == '/about' or request.path == '/about.html' %} active{% endif %}">About</a></li>
+        <li>
+            {% if current_user %}
+                <form method="POST" action="{% url 'logout' %}" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" style="background:#007bff; color:#fff; border:none; padding:0.5rem 1rem; border-radius:4px; cursor:pointer;">로그아웃({{ current_user.userName }})</button>
+                </form>
+            {% else %}
+                <a href="{% url 'login' %}" style="background:#007bff; color:#fff; border:none; padding:0.5rem 1rem; border-radius:4px; text-decoration:none;">로그인</a>
+            {% endif %}
+        </li>
+    </ul>
+    <style>
+        .nav-menu {
+            background-color: #2c3e50;
+            color: white;
+            padding: 0;
+            width: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+        }
+        .nav-menu h2 {
+            margin: 0;
+            padding: 15px 20px;
+            font-size: 1.2em;
+            white-space: nowrap;
+        }
+        .nav-menu ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            align-items: center;
+        }
+        .nav-menu li {
+            position: relative;
+            padding: 0;
+        }
+        .nav-menu a {
+            display: block;
+            padding: 15px 20px;
+            color: white;
+            text-decoration: none;
+            transition: background-color 0.3s;
+        }
+        .nav-menu a:hover {
+            background-color: #34495e;
+        }
+        .nav-menu a.active {
+            background-color: #3498db;
+        }
+    </style>
+</nav>

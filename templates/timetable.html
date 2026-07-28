@@ -1,0 +1,2439 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>기준 시간표 만들기</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            min-height: 100vh;
+        }
+
+        /* Navigation Menu Styles */
+        .nav-menu {
+            background-color: #2c3e50;
+            color: white;
+            padding: 0;
+            width: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-menu h2 {
+            margin: 0;
+            padding: 15px 20px;
+            font-size: 1.2em;
+            white-space: nowrap;
+        }
+
+        .nav-menu ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-menu li {
+            position: relative;
+            padding: 0;
+        }
+
+        .nav-menu a {
+            display: block;
+            padding: 15px 20px;
+            color: white;
+            text-decoration: none;
+            transition: background-color 0.3s;
+        }
+
+        .nav-menu a:hover {
+            background-color: #34495e;
+        }
+
+        .nav-menu a.active {
+            background-color: #3498db;
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            padding: 80px 40px 40px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 1160px;
+        }
+
+        .header-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .timetable-container {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+            height: 800px;
+            width: 100%;
+            max-width: 1160px;
+        }
+
+        #scheduleItems {
+            width: 300px;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+            flex-shrink: 0;
+            height: 100%;
+            overflow-y: auto;
+        }
+
+        #timelineContainer {
+            position: relative;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background: white;
+            width: 840px;
+            height: 100%;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding-right: 20px;
+            flex-shrink: 0;
+        }
+
+        .schedule-item {
+            position: relative;
+            padding: 10px 35px 10px 10px;
+            margin: 5px 0;
+            border-radius: 3px;
+            cursor: pointer;
+            user-select: none;
+            background-color: white;
+            border: 1px solid #ddd;
+            touch-action: none; /* 터치 동작 제어를 위해 추가 */
+        }
+        .schedule-item.long-press {
+            background-color: #e9ecef;
+        }
+        .schedule-item:hover {
+            background-color: #f8f8f8;
+        }
+        .schedule-item[data-subject="국어"] { background-color: #FF6B6B; }
+        .schedule-item[data-subject="수학"] { background-color: #4ECDC4; }
+        .schedule-item[data-subject="영어"] { background-color: #45B7D1; }
+        .schedule-item[data-subject="사회"] { background-color: #FFB347; }
+        .schedule-item[data-subject="과학"] { background-color: #96CEB4; }
+        .schedule-item[data-subject="정보"] { background-color: #9B59B6; }
+        .schedule-item[data-subject="기가"] { background-color: #F39C12; }
+        .schedule-item[data-subject="가정"] { background-color: #FF7F50; }
+        .schedule-item[data-subject="음악"] { background-color: #D35400; }
+        .schedule-item[data-subject="미술"] { background-color: #8E44AD; }
+        .schedule-item[data-subject="체육"] { background-color: #2ECC71; }
+        .schedule-item[data-subject="실과"] { background-color: #E67E22; }
+        #timeline {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 800px;
+            z-index: 1;
+        }
+        .resize-handle {
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.5);
+            cursor: ns-resize;
+            z-index: 3;
+        }
+        .resize-handle:hover {
+            background: rgba(255, 255, 255, 0.8);
+        }
+        .resize-handle.top {
+            top: 0;
+        }
+        .resize-handle.bottom {
+            bottom: 0;
+        }
+        .schedule-block {
+            position: absolute;
+            left: 60px;
+            width: 80px;
+            border-radius: 3px;
+            color: white;
+            padding: 5px;
+            box-sizing: border-box;
+            cursor: move;
+            font-size: 12px;
+            z-index: 2;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+        }
+        .schedule-block[data-subject="국어"] { background-color: #FF6B6B; }
+        .schedule-block[data-subject="수학"] { background-color: #4ECDC4; }
+        .schedule-block[data-subject="영어"] { background-color: #45B7D1; }
+        .schedule-block[data-subject="사회"] { background-color: #FFB347; }
+        .schedule-block[data-subject="과학"] { background-color: #96CEB4; }
+        .schedule-block[data-subject="정보"] { background-color: #9B59B6; }
+        .schedule-block[data-subject="기가"] { background-color: #F39C12; }
+        .schedule-block[data-subject="가정"] { background-color: #FF7F50; }
+        .schedule-block[data-subject="음악"] { background-color: #D35400; }
+        .schedule-block[data-subject="미술"] { background-color: #8E44AD; }
+        .schedule-block[data-subject="체육"] { background-color: #2ECC71; }
+        .schedule-block[data-subject="실과"] { background-color: #E67E22; }
+        .schedule-content {
+            pointer-events: none;
+            white-space: pre-line;
+            padding-bottom: 4px;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            font-size: 10px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            height: 100%;
+            position: relative;
+            padding-top: 2px; /* 리사이즈 핸들과 겹치지 않도록 최소한의 여백 */
+        }
+        .schedule-content .subject {
+            font-size: 11px;
+            font-weight: bold;
+            margin: 0;
+            line-height: 1.2;
+        }
+        .schedule-content .time {
+            font-size: 10px;
+            margin: 1px 0;
+            line-height: 1.1;
+        }
+        .schedule-content .duration {
+            font-size: 10px;
+            margin: 0;
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.1;
+        }
+        .schedule-content .subject-name {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-top: auto;
+            margin-bottom: 0;
+            line-height: 1.2;
+        }
+        #scheduleContainer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+        }
+        .schedule-block, .resize-handle {
+            pointer-events: auto;
+        }
+        .context-menu {
+            position: fixed;
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 4px 0;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+        }
+        .context-menu-item {
+            padding: 8px 12px;
+            cursor: pointer;
+            color: #333;
+            font-size: 14px;
+        }
+        .context-menu-item:hover {
+            background-color: #f0f0f0;
+        }
+        .context-menu-item.delete {
+            color: #dc3545;
+        }
+        .context-menu-item.delete:hover {
+            background-color: #ffebee;
+        }
+        /* 모달 스타일 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+        .modal-content {
+            position: relative;
+            background-color: white;
+            margin: 5% auto;  /* 15%에서 5%로 변경하여 상단으로 이동 */
+            padding: 20px;
+            width: 800px;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .close {
+            position: absolute;
+            right: 10px;
+            top: 5px;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            align-items: flex-end;
+        }
+        .form-group {
+            margin: 0;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 12px;
+            color: #666;
+        }
+        .form-group input, .form-group select {
+            padding: 6px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .form-group input[type="text"].item-name {
+            width: 120px;
+        }
+        .form-group input[type="text"].item-tag {
+            width: 80px;
+        }
+        .form-group input[type="number"] {
+            width: 80px;
+        }
+        .form-group select {
+            width: 120px;
+        }
+        .form-actions {
+            display: inline-block;
+            vertical-align: bottom;
+            margin-bottom: 15px;
+        }
+        #modalTitle {
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 18px;
+            color: #333;
+        }
+        .btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+        .btn-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+        .item-actions {
+            margin-top: 10px;
+            text-align: right;
+        }
+        .btn-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 24px;
+            line-height: 1;
+            padding: 0;
+            background-color: #007bff;
+            color: white;
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: transform 0.2s, background-color 0.2s;
+        }
+        .btn-circle:hover {
+            transform: scale(1.1);
+            background-color: #0056b3;
+        }
+        #trashZone {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #dc3545;
+            color: white;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+        #trashZone.drag-over {
+            transform: scale(1.2);
+            background-color: #c82333;
+        }
+        .confirmation-dialog {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            z-index: 1100;
+            text-align: center;
+        }
+        .confirmation-dialog .buttons {
+            margin-top: 20px;
+        }
+        .confirmation-dialog button {
+            margin: 0 10px;
+            padding: 8px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .confirmation-dialog .confirm {
+            background-color: #dc3545;
+            color: white;
+        }
+        .confirmation-dialog .cancel {
+            background-color: #6c757d;
+            color: white;
+        }
+        .items-header {
+            position: relative;
+            background: linear-gradient(135deg, #4a90e2, #357abd);
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .items-header h3 {
+            color: white;
+            margin: 0;
+            text-align: center;
+            font-size: 16px;
+            font-weight: 500;
+        }
+        .btn-add {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background-color: white;
+            color: #4a90e2;
+            border: none;
+            font-size: 20px;
+            line-height: 1;
+            padding: 0;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-add:hover {
+            transform: translateY(-50%) scale(1.1);
+            background-color: #f8f9fa;
+        }
+        .delete-item-btn {
+            position: absolute;
+            right: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: none;
+            background-color: transparent;
+            color: #dc3545;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            opacity: 0.6;
+            transition: all 0.2s ease;
+        }
+        .delete-item-btn:hover {
+            opacity: 1;
+            background-color: #fee;
+        }
+        .delete-confirmation-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1100;
+        }
+        .delete-confirmation-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            width: 300px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .delete-confirmation-content h3 {
+            margin: 0 0 15px 0;
+            color: #dc3545;
+            font-size: 18px;
+        }
+        .delete-confirmation-content p {
+            margin: 0 0 20px 0;
+            color: #666;
+            font-size: 14px;
+        }
+        .delete-confirmation-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+        .delete-confirmation-buttons button {
+            padding: 8px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+        .delete-confirmation-buttons .confirm-delete {
+            background-color: #dc3545;
+            color: white;
+        }
+        .delete-confirmation-buttons .confirm-delete:hover {
+            background-color: #c82333;
+        }
+        .delete-confirmation-buttons .cancel-delete {
+            background-color: #6c757d;
+            color: white;
+        }
+        .delete-confirmation-buttons .cancel-delete:hover {
+            background-color: #5a6268;
+        }
+        .btn-action {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-left: 10px;
+            transition: all 0.2s ease;
+        }
+        .btn-save {
+            background-color: #28a745;
+            color: white;
+        }
+        .btn-save:hover {
+            background-color: #218838;
+        }
+        .btn-new {
+            background-color: #17a2b8;
+            color: white;
+        }
+        .btn-new:hover {
+            background-color: #138496;
+        }
+        .scopes-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            position: relative;
+        }
+        .scopes-header h3 {
+            margin: 0;
+            font-size: 16px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .validation-message {
+            color: #dc3545;
+            font-size: 13px;
+            font-weight: normal;
+            margin-left: 10px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .validation-message.show {
+            opacity: 1;
+        }
+        .btn-sm {
+            padding: 4px 8px;
+            font-size: 12px;
+        }
+        .scopes-table {
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            overflow: hidden;
+            max-height: 250px;  /* 약 5개의 행이 표시될 수 있는 높이 */
+        }
+        .scopes-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .scopes-table thead {
+            position: sticky;
+            top: 0;
+            background-color: #f8f9fa;
+            z-index: 1;
+        }
+        .scopes-table tbody {
+            display: block;
+            overflow-y: auto;
+            max-height: 215px;  /* thead 높이를 제외한 높이 */
+        }
+        .scopes-table thead tr {
+            display: table;
+            width: 100%;
+            table-layout: fixed;
+        }
+        .scopes-table tbody tr {
+            display: table;
+            width: 100%;
+            table-layout: fixed;
+        }
+        .scopes-table th,
+        .scopes-table td {
+            padding: 8px 12px;
+            text-align: left;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .scopes-table th {
+            background-color: #f8f9fa;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        .scopes-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+        .scopes-table th:nth-child(1),
+        .scopes-table td:nth-child(1) {
+            width: 35%;
+        }
+        .scopes-table th:nth-child(2),
+        .scopes-table td:nth-child(2) {
+            width: 35%;
+        }
+        .scopes-table th:nth-child(3),
+        .scopes-table td:nth-child(3) {
+            width: 30%;
+        }
+        .scope-row {
+            display: table-row;
+        }
+        .scope-row td {
+            vertical-align: middle;
+        }
+        .scope-row input[type="number"] {
+            width: 80px;
+            padding: 4px 8px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+        }
+        .scope-actions {
+            display: flex;
+            gap: 5px;
+            justify-content: flex-end;
+        }
+        .delete-scope {
+            color: #dc3545;
+            background: none;
+            border: none;
+            padding: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+        .delete-scope:hover {
+            opacity: 1;
+        }
+        .modal-content {
+            max-width: 600px;
+        }
+        .validation-tooltip {
+            position: absolute;
+            background-color: #dc3545;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-top: 5px;
+            z-index: 1000;
+            animation: tooltip-fade-in 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .validation-tooltip::before {
+            content: '';
+            position: absolute;
+            top: -5px;
+            left: 10px;
+            border-width: 0 5px 5px 5px;
+            border-style: solid;
+            border-color: transparent transparent #dc3545 transparent;
+        }
+
+        .validation-tooltip.fade-out {
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        @keyframes tooltip-fade-in {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .scope-row td {
+            position: relative;
+        }
+        .days-header {
+            position: sticky;
+            top: 0;
+            background: white;
+            height: 40px;
+            z-index: 3;
+            border-bottom: 1px solid #ccc;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            padding-left: 60px;
+        }
+        .days-header .day {
+            width: 100px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Menu -->
+    {% include 'navbar.html' %}
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="container">
+            <div class="header-container">
+                <h1>기준시간표 만들기</h1>
+                <div class="header-buttons">
+                    <select id="timeTableListSelect" class="form-control" style="margin-right: 10px;">
+                        <option value="">시간표 선택</option>
+                    </select>
+                    <button class="btn btn-save" onclick="saveTimeTable()">시간표 저장</button>
+                    <button class="btn btn-new" onclick="createNewPlan()">새로 만들기</button>
+                </div>
+            </div>
+            <div class="timetable-container">
+                <div id="scheduleItems">
+                    <div class="items-header">
+                        <h3>학습항목</h3>
+                        <button onclick="openModal()" class="btn-add" title="새 학습항목 추가">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                    <div id="itemList">
+                        <!-- 학습항목이 여기에 동적으로 추가됩니다 -->
+                    </div>
+                </div>
+                <div id="timelineContainer">
+                    <canvas id="timeline"></canvas>
+                    <div id="scheduleContainer"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 학습항목 모달 -->
+        <div id="itemModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal()">&times;</span>
+                <h2 id="modalTitle">학습항목 추가</h2>
+                <form id="itemForm">
+                    <input type="hidden" id="itemId">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="itemName">학습항목명</label>
+                            <input type="text" id="itemName" class="item-name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="subjectSelect">과목</label>
+                            <select id="subjectSelect" required>
+                                <!-- 과목 옵션이 여기에 동적으로 추가됩니다 -->
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="itemTag">비고</label>
+                            <input type="text" id="itemTag" class="item-tag">
+                        </div>
+                    </div>
+                    <div id="scopesContainer">
+                        <div class="scopes-header">
+                            <h3>
+                                학습 범위
+                                <span class="validation-message"></span>
+                            </h3>
+                            <button type="button" class="btn btn-sm btn-primary" onclick="addNewScope()">
+                                <i class="fas fa-plus"></i> 범위 추가
+                            </button>
+                        </div>
+                        <div class="scopes-table">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>시작</th>
+                                        <th>끝</th>
+                                        <th>작업</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="scopesList">
+                                    <!-- 범위 항목들이 여기에 동적으로 추가됩니다 -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">저장</button>
+                        <button type="button" class="btn btn-danger" onclick="closeModal()">취소</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="confirmation-dialog" id="deleteConfirmation">
+            <h3>항목 삭제</h3>
+            <p>이 학습 항목을 삭제하시겠습니까?</p>
+            <div class="buttons">
+                <button class="cancel" onclick="cancelDelete()">취소</button>
+                <button class="confirm" onclick="confirmDelete()">삭제</button>
+            </div>
+        </div>
+
+        <!-- 삭제 확인 모달 -->
+        <div id="deleteConfirmationModal" class="delete-confirmation-modal">
+            <div class="delete-confirmation-content">
+                <h3>학습항목 삭제</h3>
+                <p>이 학습항목을 삭제하시겠습니까?</p>
+                <div class="delete-confirmation-buttons">
+                    <button class="confirm-delete" onclick="confirmItemDelete()">삭제</button>
+                    <button class="cancel-delete" onclick="cancelItemDelete()">취소</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 알림 모달 -->
+        <div id="notificationModal" class="delete-confirmation-modal">
+            <div class="delete-confirmation-content">
+                <h3>알림</h3>
+                <p id="notificationMessage"></p>
+                <div class="delete-confirmation-buttons">
+                    <button class="confirm-delete" onclick="closeNotificationModal()">확인</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 새 계획 확인 모달 -->
+        <div id="newPlanConfirmModal" class="delete-confirmation-modal">
+            <div class="delete-confirmation-content">
+                <h3>새 계획 만들기</h3>
+                <p>현재 계획을 지우고 새로 만드시겠습니까?</p>
+                <div class="delete-confirmation-buttons">
+                    <button class="confirm-delete" onclick="confirmNewPlan()">확인</button>
+                    <button class="cancel-delete" onclick="closeNewPlanConfirmModal()">취소</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js"></script>
+    <script>
+        const canvas = document.getElementById('timeline');
+        const ctx = canvas.getContext('2d');
+        const timelineContainer = document.getElementById('timelineContainer');
+        const scheduleContainer = document.getElementById('scheduleContainer');
+        const scheduleItems = document.querySelectorAll('.schedule-item');
+
+        // 캔버스 크기 설정
+        canvas.width = 800;
+        canvas.height = 1500; // (24시간 * 60픽셀) + 상단 여백 30px + 하단 여백 30px
+
+        // 타임라인 설정
+        const startHour = 0;   // 시작 시간 (0시)
+        const endHour = 24;    // 종료 시간 (24시)
+        const hourHeight = 60; // 1시간당 픽셀 높이
+        const minuteHeight = hourHeight / 60; // 1분당 픽셀 높이
+        const columnWidth = 100; // 각 요일 컬럼의 너비
+        const timelineX = 50;  // 시간 표시 X 좌표
+        const topMargin = 50;  // 상단 여백 (요일 표시를 위해 증가)
+        const days = ['월', '화', '수', '목', '금', '토', '일'];
+
+        function drawTimelineBase() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // 배경을 흰색으로 설정
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // 요일 표시
+            ctx.font = 'bold 14px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillStyle = '#000';
+            days.forEach((day, index) => {
+                const x = timelineX + columnWidth * index + columnWidth/2 + 10;
+                ctx.fillText(day, x, 25);
+            });
+
+            // 시간 표시 및 가로선
+            ctx.font = '12px Arial';
+            for (let hour = startHour; hour <= endHour; hour++) {
+                const y = hour * hourHeight + topMargin;
+                const rightX = timelineX + columnWidth * days.length + 10;
+                
+                // 좌측 시간 텍스트
+                ctx.textAlign = 'right';
+                if (hour === 24) {
+                    ctx.fillText('24:00', timelineX - 10, y + 4);
+                } else {
+                    ctx.fillText(`${hour.toString().padStart(2, '0')}:00`, timelineX - 10, y + 4);
+                }
+
+                // 우측 시간 텍스트
+                ctx.textAlign = 'left';
+                if (hour === 24) {
+                    ctx.fillText('24:00', rightX, y + 4);
+                } else {
+                    ctx.fillText(`${hour.toString().padStart(2, '0')}:00`, rightX, y + 4);
+                }
+                
+                // 정시 가로선 (진한 선)
+                ctx.beginPath();
+                ctx.moveTo(timelineX, y);
+                ctx.lineTo(rightX - 10, y);
+                ctx.strokeStyle = hour === 24 ? '#000' : '#ccc';
+                ctx.stroke();
+
+                // 10분 단위 가로선 (연한 선)
+                if (hour < endHour) {
+                    ctx.strokeStyle = '#eee';
+                    for (let minute = 10; minute < 60; minute += 10) {
+                        const minuteY = y + (minute * minuteHeight);
+                        ctx.beginPath();
+                        ctx.moveTo(timelineX, minuteY);
+                        ctx.lineTo(rightX - 10, minuteY);
+                        ctx.stroke();
+                    }
+                }
+            }
+
+            // 세로선 (요일 구분선)
+            ctx.strokeStyle = '#000';
+            for (let i = 0; i <= days.length; i++) {
+                const x = timelineX + columnWidth * i;
+                ctx.beginPath();
+                ctx.moveTo(x, topMargin);
+                ctx.lineTo(x, endHour * hourHeight + topMargin);
+                ctx.stroke();
+            }
+        }
+
+        function formatTime(hour, minute) {
+            return `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+        }
+
+        // 컨텍스트 메뉴 관련 변수
+        let activeContextMenu = null;
+
+        // 컨텍스트 메뉴 생성 함수
+        function createContextMenu(x, y) {
+            // 이전 컨텍스트 메뉴 제거
+            removeContextMenu();
+
+            const menu = document.createElement('div');
+            menu.className = 'context-menu';
+            menu.style.left = `${x}px`;
+            menu.style.top = `${y}px`;
+
+            const deleteItem = document.createElement('div');
+            deleteItem.className = 'context-menu-item delete';
+            deleteItem.textContent = '삭제';
+            menu.appendChild(deleteItem);
+
+            document.body.appendChild(menu);
+            activeContextMenu = menu;
+
+            return menu;
+        }
+
+        // 컨텍스트 메뉴 제거 함수
+        function removeContextMenu() {
+            if (activeContextMenu) {
+                activeContextMenu.remove();
+                activeContextMenu = null;
+            }
+        }
+
+        function addContextMenu(block) {
+            block.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+                removeContextMenu(); // 기존 메뉴 제거
+                
+                const menu = document.createElement('div');
+                menu.className = 'context-menu';
+                menu.style.left = `${e.clientX}px`;
+                menu.style.top = `${e.clientY}px`;
+
+                const deleteItem = document.createElement('div');
+                deleteItem.className = 'context-menu-item delete';
+                deleteItem.textContent = '삭제';
+                menu.appendChild(deleteItem);
+
+                document.body.appendChild(menu);
+                activeContextMenu = menu;
+
+                deleteItem.addEventListener('click', () => {
+                    block.remove();
+                    removeContextMenu();
+                });
+            });
+        }
+
+        function createScheduleBlock(x, y) {
+            const block = document.createElement('div');
+            block.className = 'schedule-block';
+            block.style.top = `${y}px`;
+            block.style.left = `${x}px`;
+            block.style.height = `${hourHeight}px`;
+            block.style.width = `${columnWidth - 20}px`; // 컬럼 너비에서 여백 제외
+
+            // 드래그된 항목 정보 가져오기
+            const draggedItem = document.querySelector('.schedule-item[draggable="true"]:active');
+            const subject = draggedItem ? draggedItem.getAttribute('data-subject') : '국어';
+            const itemName = draggedItem ? draggedItem.getAttribute('data-item-name') : '';
+            block.setAttribute('data-subject', subject);
+
+            // 내용을 담을 div 추가
+            const content = document.createElement('div');
+            content.className = 'schedule-content';
+            
+            // 학습항목명을 표시할 div 추가
+            const subjectDiv = document.createElement('div');
+            subjectDiv.className = 'subject';
+            subjectDiv.textContent = itemName;
+            content.appendChild(subjectDiv);
+
+            // 시간 정보를 표시할 div 추가
+            const timeDiv = document.createElement('div');
+            content.appendChild(timeDiv);
+
+            block.appendChild(content);
+            block.draggable = false;
+
+            // 리사이즈 핸들 추가
+            const topHandle = document.createElement('div');
+            topHandle.className = 'resize-handle top';
+            const bottomHandle = document.createElement('div');
+            bottomHandle.className = 'resize-handle bottom';
+
+            block.appendChild(topHandle);
+            block.appendChild(bottomHandle);
+
+            // 시간 표시 업데이트
+            updateScheduleTime(block);
+            
+            // 컨텍스트 메뉴 추가
+            addContextMenu(block);
+
+            return block;
+        }
+
+        function updateScheduleTime(block) {
+            const top = parseInt(block.style.top) - topMargin;
+            const height = parseInt(block.style.height);
+            
+            const startMinutes = Math.round(top / minuteHeight);
+            const startHour = Math.floor(startMinutes / 60);
+            const startMinute = startMinutes % 60;
+            
+            const endMinutes = Math.round((top + height) / minuteHeight);
+            const endHour = Math.floor(endMinutes / 60);
+            const endMinute = endMinutes % 60;
+            
+            const duration = Math.round(height / minuteHeight);
+            
+            // 블록 내용 업데이트
+            const content = block.querySelector('.schedule-content');
+            content.innerHTML = ''; // 기존 내용 초기화
+
+            // 학습항목명 추가
+            const itemName = block.getAttribute('data-item-name');
+            const subjectDiv = document.createElement('div');
+            subjectDiv.className = 'subject';
+            subjectDiv.textContent = itemName;
+            content.appendChild(subjectDiv);
+
+            // 시간 정보 추가
+            const timeDiv = document.createElement('div');
+            timeDiv.className = 'time';
+            timeDiv.textContent = `${formatTime(startHour, startMinute)} - ${formatTime(endHour, endMinute)}`;
+            content.appendChild(timeDiv);
+
+            // 시간 계산 추가
+            const durationDiv = document.createElement('div');
+            durationDiv.className = 'duration';
+            durationDiv.textContent = `(${duration}분)`;
+            content.appendChild(durationDiv);
+
+            // 과목명 추가
+            const subjectName = block.getAttribute('data-subject');
+            const subjectNameDiv = document.createElement('div');
+            subjectNameDiv.className = 'subject-name';
+            subjectNameDiv.textContent = subjectName;
+            content.appendChild(subjectNameDiv);
+        }
+
+        // 일정 블록 간 충돌 검사 함수
+        function checkCollision(block, newTop, newHeight, newLeft) {
+            const blocks = Array.from(scheduleContainer.querySelectorAll('.schedule-block'));
+            const currentBlock = blocks.find(b => b === block);
+            const otherBlocks = blocks.filter(b => b !== block);
+
+            // 새로운 영역의 상단과 하단 좌표
+            const newBottom = newTop + newHeight;
+
+            // 다른 모든 블록과 충돌 검사
+            return otherBlocks.some(otherBlock => {
+                const otherTop = parseInt(otherBlock.style.top);
+                const otherBottom = otherTop + parseInt(otherBlock.style.height);
+                const otherLeft = parseInt(otherBlock.style.left);
+
+                // 같은 요일 컬럼에 있는 블록끼리만 충돌 체크
+                return (newLeft === otherLeft && newTop < otherBottom && newBottom > otherTop);
+            });
+        }
+
+        function makeResizable(block) {
+            let isResizing = false;
+            let startY;
+            let startHeight;
+            let startTop;
+            let currentHandle;
+
+            function handleMouseDown(e) {
+                if (!e.target.classList.contains('resize-handle')) return;
+                
+                isResizing = true;
+                currentHandle = e.target;
+                startY = e.clientY;
+                startHeight = parseInt(block.style.height);
+                startTop = parseInt(block.style.top);
+                
+                document.addEventListener('mousemove', handleMouseMove);
+                document.addEventListener('mouseup', handleMouseUp);
+                e.stopPropagation();
+            }
+
+            function handleMouseMove(e) {
+                if (!isResizing) return;
+
+                const dy = e.clientY - startY;
+                const minHeight = minuteHeight * 10; // 최소 10분
+
+                if (currentHandle.classList.contains('top')) {
+                    const newHeight = startHeight - dy;
+                    const newTop = startTop + dy;
+                    
+                    // 10분 단위로 스냅
+                    const snapDy = Math.round(dy / (minuteHeight * 10)) * (minuteHeight * 10);
+                    const snapNewHeight = startHeight - snapDy;
+                    const snapNewTop = startTop + snapDy;
+
+                    // 다른 일정과의 충돌 검사
+                    const blocks = Array.from(scheduleContainer.querySelectorAll('.schedule-block'));
+                    const currentLeft = parseInt(block.style.left);
+                    const otherBlocks = blocks.filter(b => {
+                        return b !== block && 
+                               parseInt(b.style.left) === currentLeft && 
+                               parseInt(b.style.top) < startTop;
+                    });
+
+                    // 위쪽 블록들 중 가장 아래에 있는 블록 찾기
+                    let maxBottomOfUpperBlocks = 0;
+                    otherBlocks.forEach(b => {
+                        const bottom = parseInt(b.style.top) + parseInt(b.style.height);
+                        if (bottom > maxBottomOfUpperBlocks) {
+                            maxBottomOfUpperBlocks = bottom;
+                        }
+                    });
+                    
+                    // 최소 높이, 상단 여백, 충돌 체크
+                    if (snapNewHeight >= minHeight && 
+                        snapNewTop >= topMargin &&
+                        snapNewTop >= maxBottomOfUpperBlocks) {
+                        block.style.height = `${snapNewHeight}px`;
+                        block.style.top = `${snapNewTop}px`;
+                        requestAnimationFrame(() => updateScheduleTime(block));
+                    }
+                } else {
+                    const newHeight = startHeight + dy;
+                    
+                    // 10분 단위로 스냅
+                    const snapNewHeight = Math.round(newHeight / (minuteHeight * 10)) * (minuteHeight * 10);
+
+                    // 다른 일정과의 충돌 검사
+                    const blocks = Array.from(scheduleContainer.querySelectorAll('.schedule-block'));
+                    const currentLeft = parseInt(block.style.left);
+                    const otherBlocks = blocks.filter(b => {
+                        return b !== block && 
+                               parseInt(b.style.left) === currentLeft && 
+                               parseInt(b.style.top) > startTop;
+                    });
+
+                    // 아래쪽 블록들 중 가장 위에 있는 블록 찾기
+                    let minTopOfLowerBlocks = canvas.height;
+                    otherBlocks.forEach(b => {
+                        const top = parseInt(b.style.top);
+                        if (top < minTopOfLowerBlocks && top >= startTop) {
+                            minTopOfLowerBlocks = top;
+                        }
+                    });
+                    
+                    // 최소 높이, 캔버스 범위, 충돌 체크
+                    if (snapNewHeight >= minHeight && 
+                        (startTop + snapNewHeight) <= canvas.height &&
+                        (startTop + snapNewHeight) <= minTopOfLowerBlocks) {
+                        block.style.height = `${snapNewHeight}px`;
+                        requestAnimationFrame(() => updateScheduleTime(block));
+                    }
+                }
+            }
+
+            function handleMouseUp() {
+                isResizing = false;
+                document.removeEventListener('mousemove', handleMouseMove);
+                document.removeEventListener('mouseup', handleMouseUp);
+            }
+
+            block.addEventListener('mousedown', handleMouseDown);
+        }
+
+        function makeDraggable(block) {
+            let isDragging = false;
+            let startY;
+            let startX;
+            let startTop;
+            let startLeft;
+            let isCtrlPressed = false;
+            let clonedBlock = null;
+            let offsetX, offsetY;
+            let longPressTimer = null;
+            let isLongPress = false;
+
+            function handleMouseDown(e) {
+                if (e.target.classList.contains('resize-handle')) return;
+                
+                isDragging = false;
+                startY = e.clientY;
+                startX = e.clientX;
+                startTop = parseInt(block.style.top);
+                startLeft = parseInt(block.style.left);
+                isCtrlPressed = e.ctrlKey;
+
+                // 롱클릭 타이머 시작
+                longPressTimer = setTimeout(() => {
+                    isLongPress = true;
+                    // 롱클릭 시 복사 모드로 전환
+                    clonedBlock = block.cloneNode(true);
+                    clonedBlock.style.opacity = '0.5';
+                    clonedBlock.style.position = 'absolute';
+                    clonedBlock.style.left = block.style.left;
+                    clonedBlock.style.top = block.style.top;
+                    
+                    makeResizable(clonedBlock);
+                    makeDraggable(clonedBlock);
+                    addContextMenu(clonedBlock);
+                    
+                    scheduleContainer.appendChild(clonedBlock);
+                    isDragging = true;
+                }, 500);
+
+                // 마우스와 블록의 상대적 위치 차이 저장
+                const rect = block.getBoundingClientRect();
+                offsetX = e.clientX - rect.left;
+                offsetY = e.clientY - rect.top;
+
+                // Ctrl 키가 눌린 경우 블록 복사
+                if (isCtrlPressed) {
+                    clonedBlock = block.cloneNode(true);
+                    clonedBlock.style.opacity = '0.5';
+                    clonedBlock.style.position = 'absolute';
+                    clonedBlock.style.left = block.style.left;
+                    clonedBlock.style.top = block.style.top;
+                    
+                    makeResizable(clonedBlock);
+                    makeDraggable(clonedBlock);
+                    addContextMenu(clonedBlock);
+                    
+                    scheduleContainer.appendChild(clonedBlock);
+                }
+                
+                document.addEventListener('mousemove', handleMouseMove);
+                document.addEventListener('mouseup', handleMouseUp);
+                e.preventDefault();
+            }
+
+            function handleMouseMove(e) {
+                if (!isDragging && !isLongPress) {
+                    // 마우스가 일정 거리 이상 움직였을 때만 드래그 시작
+                    const moveX = Math.abs(e.clientX - startX);
+                    const moveY = Math.abs(e.clientY - startY);
+                    if (moveX > 5 || moveY > 5) {
+                        isDragging = true;
+                        clearTimeout(longPressTimer);
+                    }
+                }
+
+                if (isDragging || isLongPress) {
+                    const targetBlock = isCtrlPressed || isLongPress ? clonedBlock : block;
+                    if (targetBlock) {
+                        const timelineRect = timelineContainer.getBoundingClientRect();
+                        
+                        if (e.clientX >= timelineRect.left && e.clientX <= timelineRect.right &&
+                            e.clientY >= timelineRect.top && e.clientY <= timelineRect.bottom) {
+                            
+                            const mouseX = e.clientX - timelineRect.left + timelineContainer.scrollLeft;
+                            const mouseY = e.clientY - timelineRect.top + timelineContainer.scrollTop;
+                            
+                            const column = Math.floor((mouseX - offsetX - timelineX + columnWidth/2) / columnWidth);
+                            const snapLeft = timelineX + (column * columnWidth) + 10;
+                            const snapTop = Math.round((mouseY - offsetY - topMargin) / (minuteHeight * 10)) * (minuteHeight * 10) + topMargin;
+
+                            if (column >= 0 && column < days.length && 
+                                snapTop >= topMargin && 
+                                snapTop + parseInt(targetBlock.style.height) <= endHour * hourHeight + topMargin) {
+                                targetBlock.style.left = `${snapLeft}px`;
+                                targetBlock.style.top = `${snapTop}px`;
+                                targetBlock.style.opacity = '0.5';
+                                requestAnimationFrame(() => updateScheduleTime(targetBlock));
+                            }
+                        }
+                    }
+                }
+            }
+
+            function handleMouseUp(e) {
+                clearTimeout(longPressTimer);
+                const targetBlock = isCtrlPressed || isLongPress ? clonedBlock : block;
+                
+                if (targetBlock) {
+                    const timelineRect = timelineContainer.getBoundingClientRect();
+                    
+                    if (e.clientX >= timelineRect.left && e.clientX <= timelineRect.right &&
+                        e.clientY >= timelineRect.top && e.clientY <= timelineRect.bottom) {
+                        targetBlock.style.opacity = '1';
+                    } else {
+                        if (isCtrlPressed || isLongPress) {
+                            targetBlock.remove();
+                        }
+                    }
+                }
+
+                isDragging = false;
+                isLongPress = false;
+                document.removeEventListener('mousemove', handleMouseMove);
+                document.removeEventListener('mouseup', handleMouseUp);
+            }
+
+            block.addEventListener('mousedown', handleMouseDown);
+
+            // 터치 이벤트 처리
+            let touchStartX, touchStartY;
+
+            block.addEventListener('touchstart', (e) => {
+                const touch = e.touches[0];
+                touchStartX = touch.clientX;
+                touchStartY = touch.clientY;
+
+                longPressTimer = setTimeout(() => {
+                    isLongPress = true;
+                    clonedBlock = block.cloneNode(true);
+                    clonedBlock.style.opacity = '0.5';
+                    scheduleContainer.appendChild(clonedBlock);
+                    makeResizable(clonedBlock);
+                    makeDraggable(clonedBlock);
+                    addContextMenu(clonedBlock);
+                }, 500);
+            });
+
+            block.addEventListener('touchmove', (e) => {
+                const touch = e.touches[0];
+                const moveX = Math.abs(touch.clientX - touchStartX);
+                const moveY = Math.abs(touch.clientY - touchStartY);
+
+                if (moveX > 5 || moveY > 5) {
+                    clearTimeout(longPressTimer);
+                }
+            });
+
+            block.addEventListener('touchend', (e) => {
+                clearTimeout(longPressTimer);
+                if (isLongPress && clonedBlock) {
+                    const touch = e.changedTouches[0];
+                    const timelineRect = timelineContainer.getBoundingClientRect();
+                    
+                    if (touch.clientX >= timelineRect.left && touch.clientX <= timelineRect.right &&
+                        touch.clientY >= timelineRect.top && touch.clientY <= timelineRect.bottom) {
+                        clonedBlock.style.opacity = '1';
+                    } else {
+                        clonedBlock.remove();
+                    }
+                }
+                isLongPress = false;
+            });
+        }
+
+        // 드래그 앤 드롭 이벤트 처리
+        scheduleItems.forEach(item => {
+            item.addEventListener('dragstart', function(e) {
+                e.dataTransfer.setData('text/plain', item.getAttribute('data-subject'));
+                // 드래그 이미지의 오프셋을 상단 중앙으로 설정
+                const rect = e.target.getBoundingClientRect();
+                const offsetX = (rect.width / 2);
+                const offsetY = 0;
+                e.dataTransfer.setDragImage(e.target, offsetX, offsetY);
+            });
+        });
+
+        timelineContainer.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'copy';
+
+            // 마우스 위치에서 가장 가까운 10분 단위 시간과 요일 계산
+            const rect = timelineContainer.getBoundingClientRect();
+            const x = e.clientX - rect.left + timelineContainer.scrollLeft;
+            const y = e.clientY - rect.top + timelineContainer.scrollTop;
+            
+            // 요일 컬럼으로 스냅
+            const column = Math.floor((x - timelineX + columnWidth/2) / columnWidth);
+            const snapLeft = timelineX + (column * columnWidth) + 10;
+
+            // 10분 단위로 시간 스냅
+            const snapTop = Math.round((y - topMargin) / (minuteHeight * 10)) * (minuteHeight * 10) + topMargin;
+
+            // 해당 위치에 이미 일정이 있는지 확인
+            const blocks = Array.from(scheduleContainer.querySelectorAll('.schedule-block'));
+            const hasConflict = blocks.some(block => {
+                const blockLeft = parseInt(block.style.left);
+                const blockTop = parseInt(block.style.top);
+                const blockHeight = parseInt(block.style.height);
+                
+                return blockLeft === snapLeft && 
+                       snapTop >= blockTop && 
+                       snapTop < (blockTop + blockHeight);
+            });
+
+            // 충돌이 있으면 드롭 효과를 'none'으로 변경
+            if (hasConflict || column < 0 || column >= days.length || snapTop < topMargin || snapTop >= endHour * hourHeight + topMargin) {
+                e.dataTransfer.dropEffect = 'none';
+            }
+        });
+
+        timelineContainer.addEventListener('drop', function(e) {
+            e.preventDefault();
+            const rect = timelineContainer.getBoundingClientRect();
+            const x = e.clientX - rect.left + timelineContainer.scrollLeft;
+            const y = e.clientY - rect.top + timelineContainer.scrollTop;
+            
+            // 10분 단위로 시간 스냅
+            const snapTop = Math.round((y - topMargin) / (minuteHeight * 10)) * (minuteHeight * 10) + topMargin;
+            
+            // 요일 컬럼으로 스냅
+            const column = Math.floor((x - timelineX) / columnWidth);
+            const snapLeft = timelineX + (column * columnWidth) + 10;
+
+            // 해당 위치에 이미 일정이 있는지 확인
+            const blocks = Array.from(scheduleContainer.querySelectorAll('.schedule-block'));
+            const hasConflict = blocks.some(block => {
+                const blockLeft = parseInt(block.style.left);
+                const blockTop = parseInt(block.style.top);
+                const blockHeight = parseInt(block.style.height);
+                
+                return blockLeft === snapLeft && 
+                       snapTop >= blockTop && 
+                       snapTop < (blockTop + blockHeight);
+            });
+            
+            // 타임라인 범위를 벗어나지 않도록 체크하고 충돌이 없는 경우에만 일정 추가
+            if (snapTop >= topMargin && 
+                snapTop <= endHour * hourHeight && 
+                column >= 0 && 
+                column < days.length &&
+                !hasConflict) {
+                const dragData = JSON.parse(e.dataTransfer.getData('text/plain'));
+                const block = createScheduleBlock(snapLeft, snapTop);
+                block.setAttribute('data-item-id', dragData.id);
+                block.setAttribute('data-subject', dragData.subject);
+                block.setAttribute('data-item-name', dragData.itemName);
+                scheduleContainer.appendChild(block);
+                makeResizable(block);
+                makeDraggable(block);
+                updateScheduleTime(block); // 실제 시간으로 업데이트
+            }
+        });
+
+        // 초기 타임라인 그리기
+        drawTimelineBase();
+
+        // 윈도우 리사이즈 시 타임라인 다시 그리기
+        window.addEventListener('resize', drawTimelineBase);
+
+        // 다른 곳 클릭시 컨텍스트 메뉴 닫기
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.context-menu')) {
+                removeContextMenu();
+            }
+        });
+
+        // ESC 키로 컨텍스트 메뉴 닫기
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                removeContextMenu();
+            }
+        });
+
+        // 스크롤 시 컨텍스트 메뉴 닫기
+        timelineContainer.addEventListener('scroll', removeContextMenu);
+
+        // 초기 스크롤 위치 설정 (05:00)
+        window.addEventListener('load', function() {
+            const scrollTo5am = 5 * hourHeight;
+            timelineContainer.scrollTop = scrollTo5am;
+        });
+
+        // 전역 변수 추가
+        let subjects = [];
+        let items = [];
+
+        // 페이지 로드 시 초기 데이터 로드
+        window.addEventListener('DOMContentLoaded', async () => {
+            await loadSubjects();
+            await loadItems();
+            await loadTimeTable();
+        });
+
+        // 과목 데이터 로드
+        async function loadSubjects() {
+            try {
+                const response = await fetch('/api/subjects');
+                subjects = await response.json();
+                populateSubjectSelect();
+            } catch (error) {
+                console.error('과목 로드 실패:', error);
+            }
+        }
+
+        // 학습항목 데이터 로드
+        async function loadItems() {
+            try {
+                const response = await fetch('/api/items');
+                items = await response.json();
+                console.log('Loaded items:', items); // 디버깅 로그 추가
+                displayItems();
+            } catch (error) {
+                console.error('학습항목 로드 실패:', error);
+            }
+        }
+
+        // 과목 선택 옵션 채우기
+        function populateSubjectSelect() {
+            const select = document.getElementById('subjectSelect');
+            select.innerHTML = '';
+            subjects.forEach(subject => {
+                const option = document.createElement('option');
+                option.value = subject.id;
+                option.textContent = subject.subjectName;
+                select.appendChild(option);
+            });
+        }
+
+        // 학습항목 표시
+        function displayItems() {
+            const itemList = document.getElementById('itemList');
+            itemList.innerHTML = '';
+            items.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'schedule-item';
+                div.setAttribute('data-id', item.id);
+                div.setAttribute('data-subject', item.subjectName);
+                div.setAttribute('data-item-name', item.itemName);
+                div.setAttribute('draggable', 'true');
+
+                // 더블클릭 이벤트 추가
+                div.addEventListener('dblclick', () => {
+                    openModal(item);
+                });
+
+                // 롱클릭 관련 변수
+                let pressTimer = null;
+                let isLongPress = false;
+                let isDragging = false;
+
+                // 롱클릭 이벤트 처리
+                function startPress(e) {
+                    if (isDragging) return;
+                    pressTimer = setTimeout(() => {
+                        if (!isDragging) {  // 드래그 중이 아닐 때만 모달 열기
+                            isLongPress = true;
+                            openModal(item);
+                        }
+                    }, 500);
+                }
+
+                function endPress() {
+                    clearTimeout(pressTimer);
+                    isLongPress = false;
+                }
+
+                // 드래그 시작 시 롱클릭 타이머 취소
+                div.addEventListener('dragstart', (e) => {
+                    isDragging = true;
+                    clearTimeout(pressTimer);
+                    const dragData = {
+                        id: item.id,
+                        subject: item.subjectName,
+                        itemName: item.itemName
+                    };
+                    e.dataTransfer.setData('text/plain', JSON.stringify(dragData));
+
+                    // 커스텀 드래그 이미지 생성
+                    const dragImage = document.createElement('div');
+                    dragImage.className = 'schedule-block';
+                    dragImage.style.width = `${columnWidth - 20}px`;
+                    dragImage.style.height = `${hourHeight}px`;
+                    dragImage.setAttribute('data-subject', item.subjectName);
+                    
+                    // 내용 컨테이너 생성
+                    const content = document.createElement('div');
+                    content.className = 'schedule-content';
+                    
+                    // 학습항목명 추가
+                    const subjectDiv = document.createElement('div');
+                    subjectDiv.className = 'subject';
+                    subjectDiv.textContent = item.itemName;
+                    content.appendChild(subjectDiv);
+                    
+                    // 시간 정보 추가 (임시)
+                    const timeDiv = document.createElement('div');
+                    timeDiv.className = 'time';
+                    timeDiv.textContent = '00:00 - 01:00';
+                    content.appendChild(timeDiv);
+                    
+                    // 시간 계산 추가
+                    const durationDiv = document.createElement('div');
+                    durationDiv.className = 'duration';
+                    durationDiv.textContent = '(60분)';
+                    content.appendChild(durationDiv);
+                    
+                    // 과목명 추가
+                    const subjectNameDiv = document.createElement('div');
+                    subjectNameDiv.className = 'subject-name';
+                    subjectNameDiv.textContent = item.subjectName;
+                    content.appendChild(subjectNameDiv);
+                    
+                    dragImage.appendChild(content);
+                    
+                    // 드래그 이미지를 body에 추가했다가 제거
+                    dragImage.style.position = 'absolute';
+                    dragImage.style.top = '-1000px';
+                    document.body.appendChild(dragImage);
+                    
+                    // 드래그 이미지 설정
+                    e.dataTransfer.setDragImage(dragImage, columnWidth/2, 10);
+                    
+                    // dragend 이벤트에서 드래그 이미지 제거
+                    const cleanup = () => {
+                        document.body.removeChild(dragImage);
+                        div.removeEventListener('dragend', cleanup);
+                    };
+                    div.addEventListener('dragend', cleanup);
+                });
+
+                // 드래그 종료 시 상태 초기화
+                div.addEventListener('dragend', () => {
+                    isDragging = false;
+                    isLongPress = false;
+                    clearTimeout(pressTimer);
+                });
+
+                // 마우스 이벤트
+                div.addEventListener('mousedown', startPress);
+                div.addEventListener('mouseup', endPress);
+                div.addEventListener('mouseleave', endPress);
+
+                // 터치 이벤트
+                div.addEventListener('touchstart', startPress);
+                div.addEventListener('touchend', endPress);
+                div.addEventListener('touchcancel', endPress);
+
+                // 마우스 이동 감지
+                div.addEventListener('mousemove', (e) => {
+                    if (Math.abs(e.movementX) > 5 || Math.abs(e.movementY) > 5) {
+                        isDragging = true;
+                        clearTimeout(pressTimer);
+                    }
+                });
+
+                // 학습항목 텍스트 컨테이너
+                const textContent = document.createElement('span');
+                
+                // 범위량 합계 계산
+                let totalRange = 0;
+                if (item.scopes && item.scopes.length > 0) {
+                    totalRange = item.scopes.reduce((sum, scope) => {
+                        return sum + (scope.end - scope.begin + 1);
+                    }, 0);
+                }
+                
+                textContent.textContent = `${item.itemName} (${item.subjectName}) - ${totalRange}`;
+                div.appendChild(textContent);
+
+                // 삭제 버튼 추가
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'delete-item-btn';
+                deleteBtn.innerHTML = '<i class="fas fa-times"></i>';
+                deleteBtn.title = '삭제';
+                deleteBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    showDeleteConfirmationModal(item.id);
+                };
+                div.appendChild(deleteBtn);
+
+                itemList.appendChild(div);
+            });
+        }
+
+        // 새로운 범위 입력 필드 추가 함수 수정
+        function addNewScope(begin = null, end = null) {
+            const scopesList = document.getElementById('scopesList');
+            const rows = scopesList.getElementsByClassName('scope-row');
+            
+            // 이전 범위의 end 값을 확인
+            let minBegin = 1;
+            if (rows.length > 0) {
+                const lastRow = rows[rows.length - 1];
+                const lastEnd = parseInt(lastRow.querySelector('.scope-end').value);
+                minBegin = lastEnd + 1;
+            }
+
+            // begin과 end 값 설정
+            if (begin === null) {  // 범위 추가 버튼으로 호출된 경우
+                begin = minBegin;
+                end = begin + 1;
+            }
+            
+            const row = document.createElement('tr');
+            row.className = 'scope-row';
+            
+            row.innerHTML = `
+                <td>
+                    <input type="number" class="scope-begin" value="${begin}" min="${minBegin}" max="999" required
+                           oninput="validateScopeRange(this)" onchange="validateScopeRange(this)">
+                </td>
+                <td>
+                    <input type="number" class="scope-end" value="${end}" min="${begin}" max="999" required
+                           oninput="validateScopeRange(this)" onchange="validateScopeRange(this)">
+                </td>
+                <td class="scope-actions">
+                    <button type="button" class="delete-scope" onclick="deleteScope(this)" title="삭제">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </td>
+            `;
+            
+            scopesList.appendChild(row);
+            
+            // 입력 필드에 이벤트 리스너 추가
+            const beginInput = row.querySelector('.scope-begin');
+            const endInput = row.querySelector('.scope-end');
+            
+            beginInput.addEventListener('input', () => updateEndMin(beginInput, endInput));
+            
+            // 다음 범위의 begin 최소값 업데이트
+            if (rows.length > 0) {
+                updateNextRowMinBegin(row);
+            }
+        }
+
+        // 범위 삭제 함수 수정
+        function deleteScope(button) {
+            const row = button.closest('.scope-row');
+            const nextRow = row.nextElementSibling;
+            row.remove();
+            
+            // 삭제 후 남은 범위들의 최소값 재조정
+            const scopesList = document.getElementById('scopesList');
+            const rows = scopesList.getElementsByClassName('scope-row');
+            for (let i = 0; i < rows.length; i++) {
+                if (i === 0) {
+                    updateRowMinValues(rows[i], 1);
+                } else {
+                    const prevRow = rows[i - 1];
+                    const prevEnd = parseInt(prevRow.querySelector('.scope-end').value);
+                    updateRowMinValues(rows[i], prevEnd + 1);
+                }
+            }
+        }
+
+        // 범위 유효성 검사 함수 수정
+        function validateScopeRange(input) {
+            const row = input.closest('.scope-row');
+            const beginInput = row.querySelector('.scope-begin');
+            const endInput = row.querySelector('.scope-end');
+            const beginValue = parseInt(beginInput.value);
+            const endValue = parseInt(endInput.value);
+            
+            if (input.classList.contains('scope-begin')) {
+                // 시작값이 변경된 경우
+                const minBegin = parseInt(beginInput.min);
+                if (beginValue < minBegin) {
+                    beginInput.value = minBegin;
+                    showMessage(`시작값은 ${minBegin} 이상이어야 합니다.`);
+                }
+                endInput.min = parseInt(beginInput.value);
+                if (endValue < beginValue) {
+                    endInput.value = beginValue;
+                    showMessage('끝값은 시작값보다 작을 수 없습니다.');
+                }
+            } else {
+                // 끝값이 변경된 경우
+                if (endValue < beginValue) {
+                    endInput.value = beginValue;
+                    showMessage('끝값은 시작값보다 작을 수 없습니다.');
+                }
+            }
+            
+            // 다음 범위의 최소값 업데이트
+            updateNextRowMinBegin(row);
+        }
+
+        // 다음 범위의 시작 최소값 업데이트 함수 수정
+        function updateNextRowMinBegin(currentRow) {
+            const nextRow = currentRow.nextElementSibling;
+            if (nextRow) {
+                const currentEndValue = parseInt(currentRow.querySelector('.scope-end').value);
+                const nextBeginInput = nextRow.querySelector('.scope-begin');
+                const nextEndInput = nextRow.querySelector('.scope-end');
+                
+                nextBeginInput.min = currentEndValue + 1;
+                if (parseInt(nextBeginInput.value) <= currentEndValue) {
+                    nextBeginInput.value = currentEndValue + 1;
+                    nextEndInput.value = currentEndValue + 1;
+                    showMessage(`새로운 시작값은 이전 끝값(${currentEndValue})보다 커야 합니다.`);
+                }
+                updateEndMin(nextBeginInput, nextEndInput);
+            }
+        }
+
+        // 끝값의 최소값 업데이트 함수 수정
+        function updateEndMin(beginInput, endInput) {
+            const beginValue = parseInt(beginInput.value);
+            endInput.min = beginValue;
+            if (parseInt(endInput.value) < beginValue) {
+                endInput.value = beginValue;
+            }
+        }
+
+        // 툴팁 표시 함수
+        function showTooltip(element, message) {
+            // 기존 툴팁 제거
+            const existingTooltip = element.parentElement.querySelector('.validation-tooltip');
+            if (existingTooltip) {
+                existingTooltip.remove();
+            }
+
+            // 새 툴팁 생성
+            const tooltip = document.createElement('div');
+            tooltip.className = 'validation-tooltip';
+            tooltip.textContent = message;
+            element.parentElement.appendChild(tooltip);
+
+            // 3초 후 툴팁 자동 제거
+            setTimeout(() => {
+                tooltip.classList.add('fade-out');
+                setTimeout(() => tooltip.remove(), 300);
+            }, 3000);
+        }
+
+        // 스타일 추가
+        const style = document.createElement('style');
+        style.textContent = `
+            .validation-tooltip {
+                position: absolute;
+                background-color: #dc3545;
+                color: white;
+                padding: 5px 10px;
+                border-radius: 4px;
+                font-size: 12px;
+                margin-top: 5px;
+                z-index: 1000;
+                animation: tooltip-fade-in 0.3s ease;
+                white-space: nowrap;
+            }
+
+            .validation-tooltip::before {
+                content: '';
+                position: absolute;
+                top: -5px;
+                left: 10px;
+                border-width: 0 5px 5px 5px;
+                border-style: solid;
+                border-color: transparent transparent #dc3545 transparent;
+            }
+
+            .validation-tooltip.fade-out {
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            }
+
+            @keyframes tooltip-fade-in {
+                from { opacity: 0; transform: translateY(5px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+
+            .scope-row td {
+                position: relative;
+            }
+        `;
+        document.head.appendChild(style);
+
+        // 폼 제출 전 최종 유효성 검사 수정
+        document.getElementById('itemForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const scopesList = document.getElementById('scopesList');
+            const rows = scopesList.getElementsByClassName('scope-row');
+            
+            // 범위가 하나도 없는 경우
+            if (rows.length === 0) {
+                showMessage('최소 하나의 학습 범위를 추가해주세요.');
+                return;
+            }
+            
+            // 범위 데이터 수집 및 유효성 검사
+            try {
+                const scopes = Array.from(rows).map((row, index) => {
+                    const begin = parseInt(row.querySelector('.scope-begin').value);
+                    const end = parseInt(row.querySelector('.scope-end').value);
+                    
+                    // 시작값과 끝값 검사
+                    if (end < begin) {
+                        throw new Error(`${index + 1}번째 범위의 끝값은 시작값보다 작을 수 없습니다.`);
+                    }
+                    
+                    // 이전 범위와의 관계 검사
+                    if (index > 0) {
+                        const prevEnd = parseInt(rows[index - 1].querySelector('.scope-end').value);
+                        if (begin <= prevEnd) {
+                            throw new Error(`${index + 1}번째 범위의 시작값은 이전 범위의 끝값(${prevEnd})보다 커야 합니다.`);
+                        }
+                    }
+                    
+                    return { begin, end };
+                });
+                
+                const itemData = {
+                    itemName: document.getElementById('itemName').value,
+                    subId: parseInt(document.getElementById('subjectSelect').value),
+                    scopes: scopes,
+                    tag: document.getElementById('itemTag').value
+                };
+                
+                let response;
+                const itemId = document.getElementById('itemId').value;
+                
+                if (itemId) {
+                    response = await fetch(`/api/items/${itemId}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(itemData)
+                    });
+                } else {
+                    response = await fetch('/api/items', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(itemData)
+                    });
+                }
+
+                if (response.ok) {
+                    await loadItems();  // 학습항목 목록 새로고침
+                    
+                    // 시간표의 블록들 업데이트
+                    if (itemId) {
+                        const blocks = document.querySelectorAll(`.schedule-block[data-item-id="${itemId}"]`);
+                        const subject = document.getElementById('subjectSelect').options[document.getElementById('subjectSelect').selectedIndex].text;
+                        blocks.forEach(block => {
+                            block.setAttribute('data-subject', subject);
+                            block.setAttribute('data-item-name', itemData.itemName);
+                            updateScheduleTime(block);
+                        });
+                    }
+                    
+                    closeModal();
+                    if (itemId) {
+                        showNotificationModal('학습항목이 수정되었습니다.');
+                    }
+                } else {
+                    throw new Error('저장 실패');
+                }
+            } catch (error) {
+                console.error('저장 실패:', error);
+                showNotificationModal(error.message || '저장에 실패했습니다.');
+            }
+        });
+
+        let itemToDelete = null;
+
+        function showTrashZone() {
+            document.getElementById('trashZone').style.display = 'flex';
+        }
+
+        function hideTrashZone() {
+            document.getElementById('trashZone').style.display = 'none';
+            document.getElementById('trashZone').classList.remove('drag-over');
+        }
+
+        function handleDragStart(e) {
+            // ... existing drag start code ...
+            showTrashZone();
+        }
+
+        function handleDragEnd(e) {
+            // ... existing drag end code ...
+            hideTrashZone();
+        }
+
+        function showDeleteConfirmationModal(id) {
+            itemToDelete = id;
+            document.getElementById('deleteConfirmationModal').style.display = 'block';
+        }
+
+        function cancelItemDelete() {
+            itemToDelete = null;
+            document.getElementById('deleteConfirmationModal').style.display = 'none';
+        }
+
+        async function confirmItemDelete() {
+            if (itemToDelete) {
+                try {
+                    const response = await fetch(`/api/items/${itemToDelete}`, {
+                        method: 'DELETE'
+                    });
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        // 타임라인에서 해당 항목의 모든 블록 삭제
+                        const blocks = document.querySelectorAll(`.schedule-block[data-item-id="${itemToDelete}"]`);
+                        blocks.forEach(block => block.remove());
+                        
+                        // 항목 목록 새로고침
+                        await loadItems();
+                        showNotificationModal('학습항목이 삭제되었습니다.');
+                    } else {
+                        throw new Error(result.error || '삭제 실패');
+                    }
+                } catch (error) {
+                    console.error('삭제 실패:', error);
+                    showNotificationModal('삭제에 실패했습니다. ' + (error.message || ''));
+                }
+            }
+            cancelItemDelete(); // 모달 닫기
+        }
+
+        // Modify the existing drag and drop handling
+        document.addEventListener('dragover', function(e) {
+            const trashZone = document.getElementById('trashZone');
+            const rect = trashZone.getBoundingClientRect();
+            
+            if (e.clientX >= rect.left && e.clientX <= rect.right &&
+                e.clientY >= rect.top && e.clientY <= rect.bottom) {
+                e.preventDefault();
+                trashZone.classList.add('drag-over');
+            } else {
+                trashZone.classList.remove('drag-over');
+            }
+        });
+
+        document.addEventListener('drop', function(e) {
+            const trashZone = document.getElementById('trashZone');
+            const rect = trashZone.getBoundingClientRect();
+            
+            if (e.clientX >= rect.left && e.clientX <= rect.right &&
+                e.clientY >= rect.top && e.clientY <= rect.bottom) {
+                e.preventDefault();
+                const itemId = e.dataTransfer.getData('text/plain');
+                if (itemId) {
+                    showDeleteConfirmationModal(itemId);
+                }
+            }
+            hideTrashZone();
+        });
+
+        // 알림 모달 표시
+        function showNotificationModal(message) {
+            const modal = document.getElementById('notificationModal');
+            const messageElement = document.getElementById('notificationMessage');
+            messageElement.textContent = message;
+            modal.style.display = 'block';
+
+            // 스페이스 키 이벤트 핸들러 추가
+            function handleSpaceKey(e) {
+                if (e.code === 'Space' && modal.style.display === 'block') {
+                    e.preventDefault(); // 스페이스 키의 기본 동작(스크롤) 방지
+                    closeNotificationModal();
+                    document.removeEventListener('keydown', handleSpaceKey);
+                }
+            }
+
+            // 이벤트 리스너 등록
+            document.addEventListener('keydown', handleSpaceKey);
+        }
+
+        // 알림 모달 닫기
+        function closeNotificationModal() {
+            const modal = document.getElementById('notificationModal');
+            modal.style.display = 'none';
+            
+            // 모달이 닫힐 때 포커스를 적절한 요소로 이동
+            const activeElement = document.activeElement;
+            if (activeElement && activeElement.blur) {
+                activeElement.blur();
+            }
+        }
+
+        // 새 계획 확인 모달 표시
+        function showNewPlanConfirmModal() {
+            document.getElementById('newPlanConfirmModal').style.display = 'block';
+        }
+
+        // 새 계획 확인 모달 닫기
+        function closeNewPlanConfirmModal() {
+            document.getElementById('newPlanConfirmModal').style.display = 'none';
+        }
+
+        // 새 계획 확인
+        function confirmNewPlan() {
+            // 타임라인의 모든 일정 블록 제거
+            const blocks = document.querySelectorAll('.schedule-block');
+            blocks.forEach(block => block.remove());
+            closeNewPlanConfirmModal();
+        }
+
+        // 시간표 저장
+        async function saveTimeTable() {
+            try {
+                // 타임라인의 모든 일정 블록 수집
+                const blocks = document.querySelectorAll('.schedule-block');
+                const plans = Array.from(blocks).map(block => {
+                    const left = parseInt(block.style.left);
+                    const day = Math.floor((left - timelineX - 10) / columnWidth);
+                    const top = parseInt(block.style.top) - topMargin;
+                    const height = parseInt(block.style.height);
+                    const itemId = parseInt(block.getAttribute('data-item-id'));
+                    
+                    // 시작 시간과 끝 시간을 분 단위로 계산
+                    const sTime = Math.round(top / minuteHeight);
+                    const eTime = Math.round((top + height) / minuteHeight);
+
+                    return {
+                        day: day,
+                        itemId: itemId,
+                        sTime: sTime,
+                        eTime: eTime,
+                        tag: ''
+                    };
+                });
+
+                const response = await fetch('/api/timetable', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(plans)
+                });
+
+                if (response.ok) {
+                    showNotificationModal('시간표가 저장되었습니다.');
+                } else {
+                    throw new Error('저장 실패');
+                }
+            } catch (error) {
+                console.error('저장 실패:', error);
+                showNotificationModal('저장에 실패했습니다.');
+            }
+        }
+
+        // 새로운 시간표 만들기
+        function createNewPlan() {
+            showNewPlanConfirmModal();
+        }
+
+        // 시간표 데이터 로드 및 표시
+        async function loadTimeTable() {
+            try {
+                const response = await fetch('/api/timetable');
+                const plans = await response.json();
+                displayTimeTable(plans);
+            } catch (error) {
+                console.error('시간표 로드 실패:', error);
+            }
+        }
+
+        // 시간표를 타임라인에 표시
+        function displayTimeTable(plans) {
+            // 기존 블록들 제거
+            const existingBlocks = document.querySelectorAll('.schedule-block');
+            existingBlocks.forEach(block => block.remove());
+
+            plans.forEach(plan => {
+                // 해당하는 학습항목 찾기
+                const item = items.find(i => i.id === plan.itemId);
+                if (!item) return;
+
+                // 블록 위치 계산
+                const left = timelineX + (plan.day * columnWidth) + 10;
+                const top = topMargin + (plan.sTime * minuteHeight);
+                const height = (plan.eTime - plan.sTime) * minuteHeight;
+
+                // 블록 생성
+                const block = createScheduleBlock(left, top);
+                block.style.height = `${height}px`;
+                block.setAttribute('data-item-id', item.id);
+                block.setAttribute('data-subject', item.subjectName);
+                block.setAttribute('data-item-name', item.itemName);
+                
+                scheduleContainer.appendChild(block);
+                makeResizable(block);
+                makeDraggable(block);
+                updateScheduleTime(block);
+            });
+        }
+
+        // 모달 열기 함수
+        function openModal(item = null) {
+            console.log('Opening modal with item:', item); // 디버깅 로그 추가
+            const modal = document.getElementById('itemModal');
+            const form = document.getElementById('itemForm');
+            const modalTitle = document.getElementById('modalTitle');
+            const itemId = document.getElementById('itemId');
+            const itemName = document.getElementById('itemName');
+            const subjectSelect = document.getElementById('subjectSelect');
+            const itemTag = document.getElementById('itemTag');
+            const scopesList = document.getElementById('scopesList');
+
+            // 범위 목록 초기화
+            scopesList.innerHTML = '';
+
+            if (item) {
+                console.log('Item scopes:', item.scopes); // 디버깅 로그 추가
+                modalTitle.textContent = '학습항목 수정';
+                itemId.value = item.id;
+                itemName.value = item.itemName;
+                subjectSelect.value = item.subId;
+                itemTag.value = item.tag || '';
+                
+                // 기존 범위 추가
+                if (item.scopes && item.scopes.length > 0) {
+                    item.scopes.forEach(scope => {
+                        console.log('Adding scope:', scope); // 디버깅 로그 추가
+                        addNewScope(scope.begin, scope.end);
+                    });
+                } else {
+                    console.log('No scopes found, adding default scope'); // 디버깅 로그 추가
+                    addNewScope(); // 기본 범위 하나 추가
+                }
+            } else {
+                modalTitle.textContent = '학습항목 추가';
+                form.reset();
+                itemId.value = '';
+                addNewScope(); // 기본 범위 하나 추가
+            }
+
+            modal.style.display = 'block';
+            
+            // 항목명 필드 자동 선택
+            setTimeout(() => {
+                itemName.focus();
+                itemName.select();
+            }, 50);
+        }
+
+        // 모달 닫기 함수
+        function closeModal() {
+            const modal = document.getElementById('itemModal');
+            modal.style.display = 'none';
+        }
+
+        // 메시지 표시 함수
+        function showMessage(message) {
+            const messageElement = document.querySelector('.validation-message');
+            messageElement.textContent = message;
+            messageElement.classList.add('show');
+            
+            // 3초 후 메시지 숨기기
+            setTimeout(() => {
+                messageElement.classList.remove('show');
+            }, 3000);
+        }
+
+        // Get URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const planId = urlParams.get('plan_id');
+
+        // Load time table lists when the page loads
+        async function loadTimeTableLists() {
+            if (!planId) {
+                window.location.href = '/select_learning_plan';
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/time_table_lists/${planId}`);
+                const timeTableLists = await response.json();
+                
+                const select = document.getElementById('timeTableListSelect');
+                select.innerHTML = '<option value="">시간표 선택</option>';
+                
+                timeTableLists.forEach(ttl => {
+                    const option = document.createElement('option');
+                    option.value = ttl.id;
+                    option.textContent = ttl.timeTableName;
+                    select.appendChild(option);
+                });
+
+                // If there's only one time table list, select it automatically
+                if (timeTableLists.length === 1) {
+                    select.value = timeTableLists[0].id;
+                    loadTimeTable(timeTableLists[0].id);
+                }
+            } catch (error) {
+                console.error('시간표 목록 로드 실패:', error);
+            }
+        }
+
+        // Load time table when a time table list is selected
+        async function loadTimeTable(timeTableListId) {
+            try {
+                const response = await fetch(`/api/time_tables/${timeTableListId}`);
+                const timeTables = await response.json();
+                displayTimeTable(timeTables);
+            } catch (error) {
+                console.error('시간표 로드 실패:', error);
+            }
+        }
+
+        // Add event listener for time table list selection
+        document.getElementById('timeTableListSelect').addEventListener('change', function(e) {
+            if (e.target.value) {
+                loadTimeTable(e.target.value);
+            }
+        });
+
+        // Modify saveTimeTable function to include timeTableListId
+        async function saveTimeTable() {
+            const timeTableListId = document.getElementById('timeTableListSelect').value;
+            if (!timeTableListId) {
+                alert('시간표를 선택해주세요.');
+                return;
+            }
+
+            try {
+                const blocks = document.querySelectorAll('.schedule-block');
+                const plans = Array.from(blocks).map(block => {
+                    const left = parseInt(block.style.left);
+                    const day = Math.floor((left - timelineX - 10) / columnWidth);
+                    const top = parseInt(block.style.top) - topMargin;
+                    const height = parseInt(block.style.height);
+                    const itemId = parseInt(block.getAttribute('data-item-id'));
+                    
+                    const sTime = Math.round(top / minuteHeight);
+                    const eTime = Math.round((top + height) / minuteHeight);
+
+                    return {
+                        day: day,
+                        itemId: itemId,
+                        sTime: sTime,
+                        eTime: eTime,
+                        tag: '',
+                        timeTableListId: timeTableListId
+                    };
+                });
+
+                const response = await fetch('/api/timetable', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(plans)
+                });
+
+                if (response.ok) {
+                    showNotificationModal('시간표가 저장되었습니다.');
+                } else {
+                    throw new Error('저장 실패');
+                }
+            } catch (error) {
+                console.error('저장 실패:', error);
+                showNotificationModal('저장에 실패했습니다.');
+            }
+        }
+
+        // Load time table lists when the page loads
+        document.addEventListener('DOMContentLoaded', loadTimeTableLists);
+    </script>
+</body>
+</html> 
