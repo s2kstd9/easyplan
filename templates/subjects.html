@@ -466,7 +466,8 @@
         // 과목 추가
         document.getElementById('subjectForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const subjectName = document.getElementById('subjectName').value;
+            const subjectName = document.getElementById('subjectName').value.trim();
+            if (!subjectName) return;
 
             try {
                 const response = await fetch('/api/subjects', {
@@ -477,11 +478,13 @@
                     body: JSON.stringify({ subjectName })
                 });
 
+                const data = await response.json().catch(() => ({}));
+
                 if (response.ok) {
                     document.getElementById('subjectForm').reset();
                     loadSubjects();
                 } else {
-                    throw new Error('과목 추가 실패');
+                    alert(data.error || '과목 추가에 실패했습니다.');
                 }
             } catch (error) {
                 console.error('과목 추가 실패:', error);

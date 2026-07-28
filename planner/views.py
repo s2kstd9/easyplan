@@ -216,9 +216,13 @@ def api_subjects(request):
             if not subject_name:
                 return JsonResponse({'error': '과목명이 필요합니다'}, status=400)
             
-            existing = Subject.objects.filter(user=user, subjectName=subject_name).first()
+            existing = Subject.objects.filter(models.Q(user=user) | models.Q(user__isnull=True), subjectName=subject_name).first()
             if existing:
-                return JsonResponse({'message': '이미 존재하는 과목입니다', 'id': existing.id}, status=200)
+                if existing.user is None:
+                    existing.user = user
+                    existing.save()
+                    return JsonResponse({'message': '과목이 추가되었습니다', 'id': existing.id}, status=201)
+                return JsonResponse({'error': '이미 존재하는 과목입니다'}, status=400)
 
             new_subject = Subject.objects.create(subjectName=subject_name, user=user)
             return JsonResponse({'message': '과목이 추가되었습니다', 'id': new_subject.id}, status=201)
