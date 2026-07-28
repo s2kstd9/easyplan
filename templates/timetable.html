@@ -1527,6 +1527,69 @@
             if (dragGhost) dragGhost.remove();
         }
 
+        function removeGlobalDragGhost() {
+            const globalGhost = document.getElementById('globalDragGhost');
+            if (globalGhost) globalGhost.remove();
+        }
+
+        function updateGlobalDragGhost(clientX, clientY) {
+            let globalGhost = document.getElementById('globalDragGhost');
+            if (!globalGhost) {
+                globalGhost = document.createElement('div');
+                globalGhost.id = 'globalDragGhost';
+                globalGhost.className = 'schedule-block global-drag-ghost';
+                document.body.appendChild(globalGhost);
+            }
+
+            const templateData = window.currentDraggingTemplate;
+            if (!templateData) {
+                globalGhost.style.display = 'none';
+                return;
+            }
+
+            const subject = templateData.subject || '국어';
+            const itemName = templateData.itemName || '';
+
+            globalGhost.style.display = 'block';
+            globalGhost.style.position = 'fixed';
+            globalGhost.style.left = `${clientX - 60}px`;
+            globalGhost.style.top = `${clientY - 25}px`;
+            globalGhost.style.width = '120px';
+            globalGhost.style.height = '50px';
+            globalGhost.style.backgroundColor = getSubjectColor(subject);
+            globalGhost.style.zIndex = '99999';
+            globalGhost.style.pointerEvents = 'none';
+            globalGhost.style.opacity = '0.85';
+            globalGhost.style.boxShadow = '0 6px 16px rgba(0, 0, 0, 0.3)';
+
+            globalGhost.innerHTML = `
+                <div class="schedule-content" style="padding: 4px; pointer-events: none;">
+                    <div class="subject" style="font-weight: bold; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${itemName}</div>
+                    <div class="duration" style="font-size: 10px; opacity: 0.85;">(60분)</div>
+                    <div class="subject-name" style="font-size: 10px;">${subject}</div>
+                </div>
+            `;
+        }
+
+        // 전체 문서(Document) 드래그over 처리 -> 빗금 금지 커서 방지 및 패널 위 드래그 블록 연출
+        document.addEventListener('dragover', function(e) {
+            if (window.currentDraggingTemplate) {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'copy';
+
+                const timelineRect = timelineContainer.getBoundingClientRect();
+                const insideTimeline = e.clientX >= timelineRect.left && e.clientX <= timelineRect.right &&
+                                       e.clientY >= timelineRect.top && e.clientY <= timelineRect.bottom;
+
+                if (!insideTimeline) {
+                    removeDragGhost();
+                    updateGlobalDragGhost(e.clientX, e.clientY);
+                } else {
+                    removeGlobalDragGhost();
+                }
+            }
+        });
+
         const subjectColorMap = {
             '국어': '#FF6B6B',
             '수학': '#4ECDC4',
@@ -1564,6 +1627,7 @@
         timelineContainer.addEventListener('dragover', function(e) {
             e.preventDefault();
             e.dataTransfer.dropEffect = 'copy';
+            removeGlobalDragGhost();
 
             const rect = timelineContainer.getBoundingClientRect();
             const x = e.clientX - rect.left + timelineContainer.scrollLeft;
@@ -1631,12 +1695,16 @@
             const rect = timelineContainer.getBoundingClientRect();
             if (e.clientX <= rect.left || e.clientX >= rect.right || e.clientY <= rect.top || e.clientY >= rect.bottom) {
                 removeDragGhost();
+                if (window.currentDraggingTemplate) {
+                    updateGlobalDragGhost(e.clientX, e.clientY);
+                }
             }
         });
 
         timelineContainer.addEventListener('drop', function(e) {
             e.preventDefault();
             removeDragGhost();
+            removeGlobalDragGhost();
 
             const rect = timelineContainer.getBoundingClientRect();
             const x = e.clientX - rect.left + timelineContainer.scrollLeft;
@@ -1821,6 +1889,7 @@
                     clearTimeout(pressTimer);
                     window.currentDraggingTemplate = null;
                     removeDragGhost();
+                    removeGlobalDragGhost();
                 });
 
                 // 마우스 이벤트
