@@ -766,6 +766,33 @@
         .days-header .day:last-of-type {
             border-right: none;
         }
+
+        /* Collision & Invalid Location Styles */
+        .schedule-block.conflict-invalid {
+            background-color: #dc3545 !important;
+            border: 2px dashed #ff8080 !important;
+            box-shadow: 0 0 12px rgba(220, 53, 69, 0.8) !important;
+            cursor: not-allowed !important;
+        }
+        .schedule-block.conflict-invalid .schedule-content {
+            opacity: 0.7;
+        }
+        .schedule-block.conflict-invalid::after {
+            content: '🚫 위치 불가';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.85);
+            color: #ffffff;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+            pointer-events: none;
+            white-space: nowrap;
+            z-index: 10;
+        }
     </style>
 </head>
 <body>
@@ -1155,8 +1182,7 @@
         // 일정 블록 간 충돌 검사 함수
         function checkCollision(block, newTop, newHeight, newLeft) {
             const blocks = Array.from(scheduleContainer.querySelectorAll('.schedule-block'));
-            const currentBlock = blocks.find(b => b === block);
-            const otherBlocks = blocks.filter(b => b !== block);
+            const otherBlocks = blocks.filter(b => b !== block && b.id !== 'dragPreviewGhost');
 
             // 새로운 영역의 상단과 하단 좌표
             const newBottom = newTop + newHeight;
@@ -1367,13 +1393,26 @@
                             const column = Math.floor((mouseX - offsetX - timelineX + columnWidth/2) / columnWidth);
                             const snapLeft = timelineX + (column * columnWidth) + 10;
                             const snapTop = Math.round((mouseY - offsetY - topMargin) / (minuteHeight * 10)) * (minuteHeight * 10) + topMargin;
+                            const targetHeight = parseInt(targetBlock.style.height);
 
                             if (column >= 0 && column < days.length && 
                                 snapTop >= topMargin && 
-                                snapTop + parseInt(targetBlock.style.height) <= endHour * hourHeight + topMargin) {
+                                snapTop + targetHeight <= endHour * hourHeight + topMargin) {
+                                
                                 targetBlock.style.left = `${snapLeft}px`;
                                 targetBlock.style.top = `${snapTop}px`;
-                                targetBlock.style.opacity = '0.5';
+
+                                // 실시간 충돌 검사
+                                const isConflict = checkCollision(targetBlock, snapTop, targetHeight, snapLeft);
+                                if (isConflict) {
+                                    targetBlock.setAttribute('data-conflict', 'true');
+                                    targetBlock.classList.add('conflict-invalid');
+                                } else {
+                                    targetBlock.removeAttribute('data-conflict');
+                                    targetBlock.classList.remove('conflict-invalid');
+                                    targetBlock.style.opacity = '0.85';
+                                }
+
                                 requestAnimationFrame(() => updateScheduleTime(targetBlock));
                             }
                         }
@@ -1386,14 +1425,32 @@
                 const targetBlock = isCtrlPressed || isLongPress ? clonedBlock : block;
                 
                 if (targetBlock) {
+                    const isConflict = targetBlock.getAttribute('data-conflict') === 'true';
                     const timelineRect = timelineContainer.getBoundingClientRect();
-                    
-                    if (e.clientX >= timelineRect.left && e.clientX <= timelineRect.right &&
-                        e.clientY >= timelineRect.top && e.clientY <= timelineRect.bottom) {
+                    const insideTimeline = e.clientX >= timelineRect.left && e.clientX <= timelineRect.right &&
+                                           e.clientY >= timelineRect.top && e.clientY <= timelineRect.bottom;
+
+                    if (insideTimeline && !isConflict) {
                         targetBlock.style.opacity = '1';
+                        targetBlock.removeAttribute('data-conflict');
+                        targetBlock.classList.remove('conflict-invalid');
                     } else {
                         if (isCtrlPressed || isLongPress) {
                             targetBlock.remove();
+                            if (isConflict) {
+                                showNotificationModal('해당 시간대에 이미 다른 학습항목이 위치해 있어 복사할 수 없습니다.');
+                            }
+                        } else {
+                            // 기존 블록 원위치로 복귀
+                            block.style.left = `${startLeft}px`;
+                            block.style.top = `${startTop}px`;
+                            block.style.opacity = '1';
+                            block.removeAttribute('data-conflict');
+                            block.classList.remove('conflict-invalid');
+                            updateScheduleTime(block);
+                            if (isConflict) {
+                                showNotificationModal('해당 시간대에 이미 다른 학습항목이 위치해 있습니다.');
+                            }
                         }
                     }
                 }
@@ -1464,80 +1521,158 @@
             });
         });
 
+        function removeDragGhost() {
+            const dragGhost = document.getElementById('dragPreviewGhost');
+            if (dragGhost) dragGhost.remove();
+        }
+
+        const subjectColorMap = {
+            '국어': '#FF6B6B',
+            '수학': '#4ECDC4',
+            '영어': '#45B7D1',
+            '사회': '#FFB347',
+            '과학': '#96CEB4',
+            '정보': '#9B59B6',
+            '기가': '#F39C12',
+            '가정': '#FF7F50',
+            '음악': '#D35400',
+            '미술': '#8E44AD',
+            '체육': '#2ECC71',
+            '실과': '#E67E22'
+        };
+
+        const defaultPalette = [
+            '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFB347', '#96CEB4',
+            '#9B59B6', '#F39C12', '#FF7F50', '#D35400', '#8E44AD',
+            '#2ECC71', '#E67E22', '#3498DB', '#1ABC9C', '#E74C3C'
+        ];
+
+        function getSubjectColor(subjectName) {
+            if (!subjectName) return '#45B7D1';
+            if (subjectColorMap[subjectName]) {
+                return subjectColorMap[subjectName];
+            }
+            let hash = 0;
+            for (let i = 0; i < subjectName.length; i++) {
+                hash = subjectName.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            const index = Math.abs(hash) % defaultPalette.length;
+            return defaultPalette[index];
+        }
+
         timelineContainer.addEventListener('dragover', function(e) {
             e.preventDefault();
             e.dataTransfer.dropEffect = 'copy';
 
-            // 마우스 위치에서 가장 가까운 10분 단위 시간과 요일 계산
             const rect = timelineContainer.getBoundingClientRect();
             const x = e.clientX - rect.left + timelineContainer.scrollLeft;
             const y = e.clientY - rect.top + timelineContainer.scrollTop;
             
-            // 요일 컬럼으로 스냅
-            const column = Math.floor((x - timelineX + columnWidth/2) / columnWidth);
+            const column = Math.floor((x - timelineX) / columnWidth);
             const snapLeft = timelineX + (column * columnWidth) + 10;
-
-            // 10분 단위로 시간 스냅
             const snapTop = Math.round((y - topMargin) / (minuteHeight * 10)) * (minuteHeight * 10) + topMargin;
 
-            // 해당 위치에 이미 일정이 있는지 확인
-            const blocks = Array.from(scheduleContainer.querySelectorAll('.schedule-block'));
-            const hasConflict = blocks.some(block => {
-                const blockLeft = parseInt(block.style.left);
-                const blockTop = parseInt(block.style.top);
-                const blockHeight = parseInt(block.style.height);
-                
-                return blockLeft === snapLeft && 
-                       snapTop >= blockTop && 
-                       snapTop < (blockTop + blockHeight);
-            });
+            let dragGhost = document.getElementById('dragPreviewGhost');
+            if (!dragGhost) {
+                dragGhost = document.createElement('div');
+                dragGhost.id = 'dragPreviewGhost';
+                dragGhost.className = 'schedule-block drag-preview-ghost';
+                scheduleContainer.appendChild(dragGhost);
+            }
 
-            // 충돌이 있으면 드롭 효과를 'none'으로 변경
-            if (hasConflict || column < 0 || column >= days.length || snapTop < topMargin || snapTop >= endHour * hourHeight + topMargin) {
-                e.dataTransfer.dropEffect = 'none';
+            if (column >= 0 && column < days.length && snapTop >= topMargin && snapTop + hourHeight <= endHour * hourHeight + topMargin) {
+                dragGhost.style.display = 'block';
+                dragGhost.style.left = `${snapLeft}px`;
+                dragGhost.style.top = `${snapTop}px`;
+                dragGhost.style.width = `${columnWidth - 20}px`;
+                dragGhost.style.height = `${hourHeight}px`;
+
+                const templateData = window.currentDraggingTemplate || {};
+                const subject = templateData.subject || '국어';
+                const itemName = templateData.itemName || '';
+                dragGhost.setAttribute('data-subject', subject);
+                dragGhost.setAttribute('data-item-name', itemName);
+                dragGhost.style.backgroundColor = getSubjectColor(subject);
+
+                const startMinutes = Math.round((snapTop - topMargin) / minuteHeight);
+                const sHour = Math.floor(startMinutes / 60);
+                const sMin = startMinutes % 60;
+                const endMinutes = startMinutes + 60;
+                const eHour = Math.floor(endMinutes / 60);
+                const eMin = endMinutes % 60;
+
+                dragGhost.innerHTML = `
+                    <div class="schedule-content">
+                        <div class="subject">${itemName}</div>
+                        <div class="time">${formatTime(sHour, sMin)} - ${formatTime(eHour, eMin)}</div>
+                        <div class="duration">(60분)</div>
+                        <div class="subject-name">${subject}</div>
+                    </div>
+                `;
+
+                const isConflict = checkCollision(null, snapTop, hourHeight, snapLeft);
+
+                if (isConflict) {
+                    dragGhost.classList.add('conflict-invalid');
+                    dragGhost.setAttribute('data-conflict', 'true');
+                    dragGhost.style.opacity = '0.9';
+                } else {
+                    dragGhost.classList.remove('conflict-invalid');
+                    dragGhost.removeAttribute('data-conflict');
+                    dragGhost.style.opacity = '0.7';
+                }
+            } else {
+                dragGhost.style.display = 'none';
+            }
+        });
+
+        timelineContainer.addEventListener('dragleave', function(e) {
+            const rect = timelineContainer.getBoundingClientRect();
+            if (e.clientX <= rect.left || e.clientX >= rect.right || e.clientY <= rect.top || e.clientY >= rect.bottom) {
+                removeDragGhost();
             }
         });
 
         timelineContainer.addEventListener('drop', function(e) {
             e.preventDefault();
+            removeDragGhost();
+
             const rect = timelineContainer.getBoundingClientRect();
             const x = e.clientX - rect.left + timelineContainer.scrollLeft;
             const y = e.clientY - rect.top + timelineContainer.scrollTop;
             
-            // 10분 단위로 시간 스냅
             const snapTop = Math.round((y - topMargin) / (minuteHeight * 10)) * (minuteHeight * 10) + topMargin;
-            
-            // 요일 컬럼으로 스냅
             const column = Math.floor((x - timelineX) / columnWidth);
             const snapLeft = timelineX + (column * columnWidth) + 10;
 
-            // 해당 위치에 이미 일정이 있는지 확인
-            const blocks = Array.from(scheduleContainer.querySelectorAll('.schedule-block'));
-            const hasConflict = blocks.some(block => {
-                const blockLeft = parseInt(block.style.left);
-                const blockTop = parseInt(block.style.top);
-                const blockHeight = parseInt(block.style.height);
-                
-                return blockLeft === snapLeft && 
-                       snapTop >= blockTop && 
-                       snapTop < (blockTop + blockHeight);
-            });
-            
-            // 타임라인 범위를 벗어나지 않도록 체크하고 충돌이 없는 경우에만 일정 추가
+            const isConflict = checkCollision(null, snapTop, hourHeight, snapLeft);
+
             if (snapTop >= topMargin && 
-                snapTop <= endHour * hourHeight && 
+                snapTop + hourHeight <= endHour * hourHeight + topMargin && 
                 column >= 0 && 
                 column < days.length &&
-                !hasConflict) {
-                const dragData = JSON.parse(e.dataTransfer.getData('text/plain'));
-                const block = createScheduleBlock(snapLeft, snapTop);
-                block.setAttribute('data-item-id', dragData.id);
-                block.setAttribute('data-subject', dragData.subject);
-                block.setAttribute('data-item-name', dragData.itemName);
-                scheduleContainer.appendChild(block);
-                makeResizable(block);
-                makeDraggable(block);
-                updateScheduleTime(block); // 실제 시간으로 업데이트
+                !isConflict) {
+                
+                let dragData = null;
+                try {
+                    dragData = JSON.parse(e.dataTransfer.getData('text/plain'));
+                } catch (err) {
+                    return;
+                }
+
+                if (dragData) {
+                    const block = createScheduleBlock(snapLeft, snapTop);
+                    block.setAttribute('data-item-id', dragData.id);
+                    block.setAttribute('data-subject', dragData.subject);
+                    block.setAttribute('data-item-name', dragData.itemName);
+                    block.style.backgroundColor = getSubjectColor(dragData.subject);
+                    scheduleContainer.appendChild(block);
+                    makeResizable(block);
+                    makeDraggable(block);
+                    updateScheduleTime(block);
+                }
+            } else if (isConflict) {
+                showNotificationModal('해당 시간대에 이미 다른 학습항목이 위치해 있어 추가할 수 없습니다.');
             }
         });
 
@@ -1660,7 +1795,7 @@
                     isLongPress = false;
                 }
 
-                // 드래그 시작 시 롱클릭 타이머 취소
+                // 드래그 시작 시 롱클릭 타이머 취소 및 데이터 설정
                 div.addEventListener('dragstart', (e) => {
                     isDragging = true;
                     clearTimeout(pressTimer);
@@ -1669,66 +1804,22 @@
                         subject: item.subjectName,
                         itemName: item.itemName
                     };
+                    window.currentDraggingTemplate = dragData;
                     e.dataTransfer.setData('text/plain', JSON.stringify(dragData));
 
-                    // 커스텀 드래그 이미지 생성
-                    const dragImage = document.createElement('div');
-                    dragImage.className = 'schedule-block';
-                    dragImage.style.width = `${columnWidth - 20}px`;
-                    dragImage.style.height = `${hourHeight}px`;
-                    dragImage.setAttribute('data-subject', item.subjectName);
-                    
-                    // 내용 컨테이너 생성
-                    const content = document.createElement('div');
-                    content.className = 'schedule-content';
-                    
-                    // 학습항목명 추가
-                    const subjectDiv = document.createElement('div');
-                    subjectDiv.className = 'subject';
-                    subjectDiv.textContent = item.itemName;
-                    content.appendChild(subjectDiv);
-                    
-                    // 시간 정보 추가 (임시)
-                    const timeDiv = document.createElement('div');
-                    timeDiv.className = 'time';
-                    timeDiv.textContent = '00:00 - 01:00';
-                    content.appendChild(timeDiv);
-                    
-                    // 시간 계산 추가
-                    const durationDiv = document.createElement('div');
-                    durationDiv.className = 'duration';
-                    durationDiv.textContent = '(60분)';
-                    content.appendChild(durationDiv);
-                    
-                    // 과목명 추가
-                    const subjectNameDiv = document.createElement('div');
-                    subjectNameDiv.className = 'subject-name';
-                    subjectNameDiv.textContent = item.subjectName;
-                    content.appendChild(subjectNameDiv);
-                    
-                    dragImage.appendChild(content);
-                    
-                    // 드래그 이미지를 body에 추가했다가 제거
-                    dragImage.style.position = 'absolute';
-                    dragImage.style.top = '-1000px';
-                    document.body.appendChild(dragImage);
-                    
-                    // 드래그 이미지 설정
-                    e.dataTransfer.setDragImage(dragImage, columnWidth/2, 10);
-                    
-                    // dragend 이벤트에서 드래그 이미지 제거
-                    const cleanup = () => {
-                        document.body.removeChild(dragImage);
-                        div.removeEventListener('dragend', cleanup);
-                    };
-                    div.addEventListener('dragend', cleanup);
+                    // 투명 1x1 이미지 설정 (이중 박스 및 기본 OS 금지 아이콘 대체)
+                    const emptyImg = new Image();
+                    emptyImg.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+                    e.dataTransfer.setDragImage(emptyImg, 0, 0);
                 });
 
-                // 드래그 종료 시 상태 초기화
+                // 드래그 종료 시 상태 초기화 및 고스트 가이드 제거
                 div.addEventListener('dragend', () => {
                     isDragging = false;
                     isLongPress = false;
                     clearTimeout(pressTimer);
+                    window.currentDraggingTemplate = null;
+                    removeDragGhost();
                 });
 
                 // 마우스 이벤트
