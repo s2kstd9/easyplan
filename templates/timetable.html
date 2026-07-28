@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -124,26 +125,66 @@
             user-select: none;
             background-color: white;
             border: 1px solid #ddd;
-            touch-action: none; /* 터치 동작 제어를 위해 추가 */
+            touch-action: none;
+            /* 터치 동작 제어를 위해 추가 */
         }
+
         .schedule-item.long-press {
             background-color: #e9ecef;
         }
+
         .schedule-item:hover {
             background-color: #f8f8f8;
         }
-        .schedule-item[data-subject="국어"] { background-color: #FF6B6B; }
-        .schedule-item[data-subject="수학"] { background-color: #4ECDC4; }
-        .schedule-item[data-subject="영어"] { background-color: #45B7D1; }
-        .schedule-item[data-subject="사회"] { background-color: #FFB347; }
-        .schedule-item[data-subject="과학"] { background-color: #96CEB4; }
-        .schedule-item[data-subject="정보"] { background-color: #9B59B6; }
-        .schedule-item[data-subject="기가"] { background-color: #F39C12; }
-        .schedule-item[data-subject="가정"] { background-color: #FF7F50; }
-        .schedule-item[data-subject="음악"] { background-color: #D35400; }
-        .schedule-item[data-subject="미술"] { background-color: #8E44AD; }
-        .schedule-item[data-subject="체육"] { background-color: #2ECC71; }
-        .schedule-item[data-subject="실과"] { background-color: #E67E22; }
+
+        .schedule-item[data-subject="국어"] {
+            background-color: #FF6B6B;
+        }
+
+        .schedule-item[data-subject="수학"] {
+            background-color: #4ECDC4;
+        }
+
+        .schedule-item[data-subject="영어"] {
+            background-color: #45B7D1;
+        }
+
+        .schedule-item[data-subject="사회"] {
+            background-color: #FFB347;
+        }
+
+        .schedule-item[data-subject="과학"] {
+            background-color: #96CEB4;
+        }
+
+        .schedule-item[data-subject="정보"] {
+            background-color: #9B59B6;
+        }
+
+        .schedule-item[data-subject="기가"] {
+            background-color: #F39C12;
+        }
+
+        .schedule-item[data-subject="가정"] {
+            background-color: #FF7F50;
+        }
+
+        .schedule-item[data-subject="음악"] {
+            background-color: #D35400;
+        }
+
+        .schedule-item[data-subject="미술"] {
+            background-color: #8E44AD;
+        }
+
+        .schedule-item[data-subject="체육"] {
+            background-color: #2ECC71;
+        }
+
+        .schedule-item[data-subject="실과"] {
+            background-color: #E67E22;
+        }
+
         #timeline {
             position: absolute;
             top: 0;
@@ -151,6 +192,7 @@
             width: 800px;
             z-index: 1;
         }
+
         .resize-handle {
             position: absolute;
             left: 0;
@@ -160,15 +202,19 @@
             cursor: ns-resize;
             z-index: 3;
         }
+
         .resize-handle:hover {
             background: rgba(255, 255, 255, 0.8);
         }
+
         .resize-handle.top {
             top: 0;
         }
+
         .resize-handle.bottom {
             bottom: 0;
         }
+
         .schedule-block {
             position: absolute;
             left: 60px;
@@ -185,18 +231,55 @@
             -moz-user-select: none;
             -ms-user-select: none;
         }
-        .schedule-block[data-subject="국어"] { background-color: #FF6B6B; }
-        .schedule-block[data-subject="수학"] { background-color: #4ECDC4; }
-        .schedule-block[data-subject="영어"] { background-color: #45B7D1; }
-        .schedule-block[data-subject="사회"] { background-color: #FFB347; }
-        .schedule-block[data-subject="과학"] { background-color: #96CEB4; }
-        .schedule-block[data-subject="정보"] { background-color: #9B59B6; }
-        .schedule-block[data-subject="기가"] { background-color: #F39C12; }
-        .schedule-block[data-subject="가정"] { background-color: #FF7F50; }
-        .schedule-block[data-subject="음악"] { background-color: #D35400; }
-        .schedule-block[data-subject="미술"] { background-color: #8E44AD; }
-        .schedule-block[data-subject="체육"] { background-color: #2ECC71; }
-        .schedule-block[data-subject="실과"] { background-color: #E67E22; }
+
+        .schedule-block[data-subject="국어"] {
+            background-color: #FF6B6B;
+        }
+
+        .schedule-block[data-subject="수학"] {
+            background-color: #4ECDC4;
+        }
+
+        .schedule-block[data-subject="영어"] {
+            background-color: #45B7D1;
+        }
+
+        .schedule-block[data-subject="사회"] {
+            background-color: #FFB347;
+        }
+
+        .schedule-block[data-subject="과학"] {
+            background-color: #96CEB4;
+        }
+
+        .schedule-block[data-subject="정보"] {
+            background-color: #9B59B6;
+        }
+
+        .schedule-block[data-subject="기가"] {
+            background-color: #F39C12;
+        }
+
+        .schedule-block[data-subject="가정"] {
+            background-color: #FF7F50;
+        }
+
+        .schedule-block[data-subject="음악"] {
+            background-color: #D35400;
+        }
+
+        .schedule-block[data-subject="미술"] {
+            background-color: #8E44AD;
+        }
+
+        .schedule-block[data-subject="체육"] {
+            background-color: #2ECC71;
+        }
+
+        .schedule-block[data-subject="실과"] {
+            background-color: #E67E22;
+        }
+
         .schedule-content {
             pointer-events: none;
             white-space: pre-line;
@@ -212,25 +295,30 @@
             justify-content: flex-start;
             height: 100%;
             position: relative;
-            padding-top: 2px; /* 리사이즈 핸들과 겹치지 않도록 최소한의 여백 */
+            padding-top: 2px;
+            /* 리사이즈 핸들과 겹치지 않도록 최소한의 여백 */
         }
+
         .schedule-content .subject {
             font-size: 11px;
             font-weight: bold;
             margin: 0;
             line-height: 1.2;
         }
+
         .schedule-content .time {
             font-size: 10px;
             margin: 1px 0;
             line-height: 1.1;
         }
+
         .schedule-content .duration {
             font-size: 10px;
             margin: 0;
             color: rgba(255, 255, 255, 0.9);
             line-height: 1.1;
         }
+
         .schedule-content .subject-name {
             font-size: 11px;
             color: rgba(255, 255, 255, 0.8);
@@ -238,6 +326,7 @@
             margin-bottom: 0;
             line-height: 1.2;
         }
+
         #scheduleContainer {
             position: absolute;
             top: 0;
@@ -246,9 +335,12 @@
             bottom: 0;
             pointer-events: none;
         }
-        .schedule-block, .resize-handle {
+
+        .schedule-block,
+        .resize-handle {
             pointer-events: auto;
         }
+
         .context-menu {
             position: fixed;
             background: white;
@@ -258,21 +350,26 @@
             box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
             z-index: 1000;
         }
+
         .context-menu-item {
             padding: 8px 12px;
             cursor: pointer;
             color: #333;
             font-size: 14px;
         }
+
         .context-menu-item:hover {
             background-color: #f0f0f0;
         }
+
         .context-menu-item.delete {
             color: #dc3545;
         }
+
         .context-menu-item.delete:hover {
             background-color: #ffebee;
         }
+
         /* 모달 스타일 */
         .modal {
             display: none;
@@ -284,15 +381,18 @@
             background-color: rgba(0, 0, 0, 0.5);
             z-index: 1000;
         }
+
         .modal-content {
             position: relative;
             background-color: white;
-            margin: 5% auto;  /* 15%에서 5%로 변경하여 상단으로 이동 */
+            margin: 5% auto;
+            /* 15%에서 5%로 변경하여 상단으로 이동 */
             padding: 20px;
             width: 800px;
             border-radius: 5px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
+
         .close {
             position: absolute;
             right: 10px;
@@ -300,68 +400,84 @@
             font-size: 24px;
             cursor: pointer;
         }
+
         .form-row {
             display: flex;
             gap: 15px;
             margin-bottom: 20px;
             align-items: flex-end;
         }
+
         .form-group {
             margin: 0;
         }
+
         .form-group label {
             display: block;
             margin-bottom: 5px;
             font-size: 12px;
             color: #666;
         }
-        .form-group input, .form-group select {
+
+        .form-group input,
+        .form-group select {
             padding: 6px;
             border: 1px solid #ddd;
             border-radius: 4px;
             font-size: 14px;
         }
+
         .form-group input[type="text"].item-name {
             width: 120px;
         }
+
         .form-group input[type="text"].item-tag {
             width: 80px;
         }
+
         .form-group input[type="number"] {
             width: 80px;
         }
+
         .form-group select {
             width: 120px;
         }
+
         .form-actions {
             display: inline-block;
             vertical-align: bottom;
             margin-bottom: 15px;
         }
+
         #modalTitle {
             margin-top: 0;
             margin-bottom: 20px;
             font-size: 18px;
             color: #333;
         }
+
         .btn {
             padding: 8px 15px;
             border: none;
             border-radius: 4px;
             cursor: pointer;
         }
+
         .btn-primary {
             background-color: #007bff;
             color: white;
         }
+
         .btn-danger {
             background-color: #dc3545;
             color: white;
         }
+
         .item-actions {
             margin-top: 10px;
             text-align: right;
         }
+
         .btn-circle {
             width: 40px;
             height: 40px;
@@ -374,13 +490,15 @@
             position: absolute;
             right: 10px;
             top: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
             transition: transform 0.2s, background-color 0.2s;
         }
+
         .btn-circle:hover {
             transform: scale(1.1);
             background-color: #0056b3;
         }
+
         #trashZone {
             position: fixed;
             bottom: 20px;
@@ -394,14 +512,16 @@
             align-items: center;
             justify-content: center;
             font-size: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
             transition: all 0.3s ease;
             z-index: 1000;
         }
+
         #trashZone.drag-over {
             transform: scale(1.2);
             background-color: #c82333;
         }
+
         .confirmation-dialog {
             display: none;
             position: fixed;
@@ -411,13 +531,15 @@
             background: white;
             padding: 20px;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
             z-index: 1100;
             text-align: center;
         }
+
         .confirmation-dialog .buttons {
             margin-top: 20px;
         }
+
         .confirmation-dialog button {
             margin: 0 10px;
             padding: 8px 20px;
@@ -425,22 +547,26 @@
             border-radius: 4px;
             cursor: pointer;
         }
+
         .confirmation-dialog .confirm {
             background-color: #dc3545;
             color: white;
         }
+
         .confirmation-dialog .cancel {
             background-color: #6c757d;
             color: white;
         }
+
         .items-header {
             position: relative;
             background: linear-gradient(135deg, #4a90e2, #357abd);
             padding: 15px;
             border-radius: 5px;
             margin-bottom: 15px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
+
         .items-header h3 {
             color: white;
             margin: 0;
@@ -448,6 +574,7 @@
             font-size: 16px;
             font-weight: 500;
         }
+
         .btn-add {
             position: absolute;
             right: 10px;
@@ -463,16 +590,18 @@
             line-height: 1;
             padding: 0;
             cursor: pointer;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             transition: all 0.2s ease;
             display: flex;
             align-items: center;
             justify-content: center;
         }
+
         .btn-add:hover {
             transform: translateY(-50%) scale(1.1);
             background-color: #f8f9fa;
         }
+
         .delete-item-btn {
             position: absolute;
             right: 5px;
@@ -492,10 +621,12 @@
             opacity: 0.6;
             transition: all 0.2s ease;
         }
+
         .delete-item-btn:hover {
             opacity: 1;
             background-color: #fee;
         }
+
         .delete-confirmation-modal {
             display: none;
             position: fixed;
@@ -506,6 +637,7 @@
             background-color: rgba(0, 0, 0, 0.5);
             z-index: 1100;
         }
+
         .delete-confirmation-content {
             position: absolute;
             top: 50%;
@@ -516,23 +648,27 @@
             border-radius: 8px;
             width: 300px;
             text-align: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
+
         .delete-confirmation-content h3 {
             margin: 0 0 15px 0;
             color: #dc3545;
             font-size: 18px;
         }
+
         .delete-confirmation-content p {
             margin: 0 0 20px 0;
             color: #666;
             font-size: 14px;
         }
+
         .delete-confirmation-buttons {
             display: flex;
             justify-content: center;
             gap: 10px;
         }
+
         .delete-confirmation-buttons button {
             padding: 8px 20px;
             border: none;
@@ -541,20 +677,25 @@
             font-size: 14px;
             transition: all 0.2s ease;
         }
+
         .delete-confirmation-buttons .confirm-delete {
             background-color: #dc3545;
             color: white;
         }
+
         .delete-confirmation-buttons .confirm-delete:hover {
             background-color: #c82333;
         }
+
         .delete-confirmation-buttons .cancel-delete {
             background-color: #6c757d;
             color: white;
         }
+
         .delete-confirmation-buttons .cancel-delete:hover {
             background-color: #5a6268;
         }
+
         .btn-action {
             padding: 8px 16px;
             border: none;
@@ -564,20 +705,25 @@
             margin-left: 10px;
             transition: all 0.2s ease;
         }
+
         .btn-save {
             background-color: #28a745;
             color: white;
         }
+
         .btn-save:hover {
             background-color: #218838;
         }
+
         .btn-new {
             background-color: #17a2b8;
             color: white;
         }
+
         .btn-new:hover {
             background-color: #138496;
         }
+
         .scopes-header {
             display: flex;
             justify-content: space-between;
@@ -585,6 +731,7 @@
             margin-bottom: 10px;
             position: relative;
         }
+
         .scopes-header h3 {
             margin: 0;
             font-size: 16px;
@@ -593,6 +740,7 @@
             align-items: center;
             gap: 10px;
         }
+
         .validation-message {
             color: #dc3545;
             font-size: 13px;
@@ -601,87 +749,108 @@
             opacity: 0;
             transition: opacity 0.3s ease;
         }
+
         .validation-message.show {
             opacity: 1;
         }
+
         .btn-sm {
             padding: 4px 8px;
             font-size: 12px;
         }
+
         .scopes-table {
             border: 1px solid #dee2e6;
             border-radius: 4px;
             overflow: hidden;
-            max-height: 250px;  /* 약 5개의 행이 표시될 수 있는 높이 */
+            max-height: 250px;
+            /* 약 5개의 행이 표시될 수 있는 높이 */
         }
+
         .scopes-table table {
             width: 100%;
             border-collapse: collapse;
         }
+
         .scopes-table thead {
             position: sticky;
             top: 0;
             background-color: #f8f9fa;
             z-index: 1;
         }
+
         .scopes-table tbody {
             display: block;
             overflow-y: auto;
-            max-height: 215px;  /* thead 높이를 제외한 높이 */
+            max-height: 215px;
+            /* thead 높이를 제외한 높이 */
         }
+
         .scopes-table thead tr {
             display: table;
             width: 100%;
             table-layout: fixed;
         }
+
         .scopes-table tbody tr {
             display: table;
             width: 100%;
             table-layout: fixed;
         }
+
         .scopes-table th,
         .scopes-table td {
             padding: 8px 12px;
             text-align: left;
             border-bottom: 1px solid #dee2e6;
         }
+
         .scopes-table th {
             background-color: #f8f9fa;
             font-weight: 500;
             font-size: 14px;
         }
+
         .scopes-table tbody tr:last-child td {
             border-bottom: none;
         }
+
         .scopes-table th:nth-child(1),
         .scopes-table td:nth-child(1) {
             width: 35%;
         }
+
         .scopes-table th:nth-child(2),
         .scopes-table td:nth-child(2) {
             width: 35%;
         }
+
         .scopes-table th:nth-child(3),
         .scopes-table td:nth-child(3) {
             width: 30%;
         }
+
         .scope-row {
             display: table-row;
         }
+
         .scope-row td {
             vertical-align: middle;
         }
+
         .scope-row input[type="number"] {
             width: 80px;
             padding: 4px 8px;
             border: 1px solid #ced4da;
             border-radius: 4px;
         }
+
         .scope-actions {
             display: flex;
             gap: 5px;
             justify-content: flex-end;
         }
+
         .delete-scope {
             color: #dc3545;
             background: none;
@@ -692,12 +861,15 @@
             opacity: 0.7;
             transition: opacity 0.2s;
         }
+
         .delete-scope:hover {
             opacity: 1;
         }
+
         .modal-content {
             max-width: 600px;
         }
+
         .validation-tooltip {
             position: absolute;
             background-color: #dc3545;
@@ -727,13 +899,21 @@
         }
 
         @keyframes tooltip-fade-in {
-            from { opacity: 0; transform: translateY(5px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .scope-row td {
             position: relative;
         }
+
         .days-header {
             position: sticky;
             top: 0;
@@ -750,10 +930,12 @@
             user-select: none;
             box-sizing: border-box;
         }
+
         .days-header .time-spacer {
             width: 60px;
             flex-shrink: 0;
         }
+
         .days-header .day {
             width: 100px;
             text-align: center;
@@ -763,6 +945,7 @@
             border-right: 1px solid rgba(255, 255, 255, 0.15);
             box-sizing: border-box;
         }
+
         .days-header .day:last-of-type {
             border-right: none;
         }
@@ -774,9 +957,11 @@
             box-shadow: 0 0 12px rgba(220, 53, 69, 0.8) !important;
             cursor: not-allowed !important;
         }
+
         .schedule-block.conflict-invalid .schedule-content {
             opacity: 0.7;
         }
+
         .schedule-block.conflict-invalid::after {
             content: '🚫 위치 불가';
             position: absolute;
@@ -795,6 +980,7 @@
         }
     </style>
 </head>
+
 <body>
     <!-- Navigation Menu -->
     {% include 'navbar.html' %}
@@ -966,7 +1152,7 @@
 
         function drawTimelineBase() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
+
             // 배경을 흰색으로 설정
             ctx.fillStyle = 'white';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -977,7 +1163,7 @@
             for (let hour = startHour; hour <= endHour; hour++) {
                 const y = hour * hourHeight + topMargin;
                 const rightX = timelineX + columnWidth * days.length + 10;
-                
+
                 // 좌측 시간 텍스트
                 ctx.textAlign = 'right';
                 if (hour === 24) {
@@ -993,7 +1179,7 @@
                 } else {
                     ctx.fillText(`${hour.toString().padStart(2, '0')}:00`, rightX, y + 4);
                 }
-                
+
                 // 정시 가로선 (진한 선)
                 ctx.beginPath();
                 ctx.moveTo(timelineX, y);
@@ -1062,10 +1248,10 @@
         }
 
         function addContextMenu(block) {
-            block.addEventListener('contextmenu', function(e) {
+            block.addEventListener('contextmenu', function (e) {
                 e.preventDefault();
                 removeContextMenu(); // 기존 메뉴 제거
-                
+
                 const menu = document.createElement('div');
                 menu.className = 'context-menu';
                 menu.style.left = `${e.clientX}px`;
@@ -1103,7 +1289,7 @@
             // 내용을 담을 div 추가
             const content = document.createElement('div');
             content.className = 'schedule-content';
-            
+
             // 학습항목명을 표시할 div 추가
             const subjectDiv = document.createElement('div');
             subjectDiv.className = 'subject';
@@ -1128,7 +1314,7 @@
 
             // 시간 표시 업데이트
             updateScheduleTime(block);
-            
+
             // 컨텍스트 메뉴 추가
             addContextMenu(block);
 
@@ -1138,17 +1324,17 @@
         function updateScheduleTime(block) {
             const top = parseInt(block.style.top) - topMargin;
             const height = parseInt(block.style.height);
-            
+
             const startMinutes = Math.round(top / minuteHeight);
             const startHour = Math.floor(startMinutes / 60);
             const startMinute = startMinutes % 60;
-            
+
             const endMinutes = Math.round((top + height) / minuteHeight);
             const endHour = Math.floor(endMinutes / 60);
             const endMinute = endMinutes % 60;
-            
+
             const duration = Math.round(height / minuteHeight);
-            
+
             // 블록 내용 업데이트
             const content = block.querySelector('.schedule-content');
             content.innerHTML = ''; // 기존 내용 초기화
@@ -1208,13 +1394,13 @@
 
             function handleMouseDown(e) {
                 if (!e.target.classList.contains('resize-handle')) return;
-                
+
                 isResizing = true;
                 currentHandle = e.target;
                 startY = e.clientY;
                 startHeight = parseInt(block.style.height);
                 startTop = parseInt(block.style.top);
-                
+
                 document.addEventListener('mousemove', handleMouseMove);
                 document.addEventListener('mouseup', handleMouseUp);
                 e.stopPropagation();
@@ -1229,7 +1415,7 @@
                 if (currentHandle.classList.contains('top')) {
                     const newHeight = startHeight - dy;
                     const newTop = startTop + dy;
-                    
+
                     // 10분 단위로 스냅
                     const snapDy = Math.round(dy / (minuteHeight * 10)) * (minuteHeight * 10);
                     const snapNewHeight = startHeight - snapDy;
@@ -1239,9 +1425,9 @@
                     const blocks = Array.from(scheduleContainer.querySelectorAll('.schedule-block'));
                     const currentLeft = parseInt(block.style.left);
                     const otherBlocks = blocks.filter(b => {
-                        return b !== block && 
-                               parseInt(b.style.left) === currentLeft && 
-                               parseInt(b.style.top) < startTop;
+                        return b !== block &&
+                            parseInt(b.style.left) === currentLeft &&
+                            parseInt(b.style.top) < startTop;
                     });
 
                     // 위쪽 블록들 중 가장 아래에 있는 블록 찾기
@@ -1252,9 +1438,9 @@
                             maxBottomOfUpperBlocks = bottom;
                         }
                     });
-                    
+
                     // 최소 높이, 상단 여백, 충돌 체크
-                    if (snapNewHeight >= minHeight && 
+                    if (snapNewHeight >= minHeight &&
                         snapNewTop >= topMargin &&
                         snapNewTop >= maxBottomOfUpperBlocks) {
                         block.style.height = `${snapNewHeight}px`;
@@ -1263,7 +1449,7 @@
                     }
                 } else {
                     const newHeight = startHeight + dy;
-                    
+
                     // 10분 단위로 스냅
                     const snapNewHeight = Math.round(newHeight / (minuteHeight * 10)) * (minuteHeight * 10);
 
@@ -1271,9 +1457,9 @@
                     const blocks = Array.from(scheduleContainer.querySelectorAll('.schedule-block'));
                     const currentLeft = parseInt(block.style.left);
                     const otherBlocks = blocks.filter(b => {
-                        return b !== block && 
-                               parseInt(b.style.left) === currentLeft && 
-                               parseInt(b.style.top) > startTop;
+                        return b !== block &&
+                            parseInt(b.style.left) === currentLeft &&
+                            parseInt(b.style.top) > startTop;
                     });
 
                     // 아래쪽 블록들 중 가장 위에 있는 블록 찾기
@@ -1284,9 +1470,9 @@
                             minTopOfLowerBlocks = top;
                         }
                     });
-                    
+
                     // 최소 높이, 캔버스 범위, 충돌 체크
-                    if (snapNewHeight >= minHeight && 
+                    if (snapNewHeight >= minHeight &&
                         (startTop + snapNewHeight) <= canvas.height &&
                         (startTop + snapNewHeight) <= minTopOfLowerBlocks) {
                         block.style.height = `${snapNewHeight}px`;
@@ -1318,7 +1504,7 @@
 
             function handleMouseDown(e) {
                 if (e.target.classList.contains('resize-handle')) return;
-                
+
                 isDragging = false;
                 startY = e.clientY;
                 startX = e.clientX;
@@ -1335,11 +1521,11 @@
                     clonedBlock.style.position = 'absolute';
                     clonedBlock.style.left = block.style.left;
                     clonedBlock.style.top = block.style.top;
-                    
+
                     makeResizable(clonedBlock);
                     makeDraggable(clonedBlock);
                     addContextMenu(clonedBlock);
-                    
+
                     scheduleContainer.appendChild(clonedBlock);
                     isDragging = true;
                 }, 500);
@@ -1356,14 +1542,14 @@
                     clonedBlock.style.position = 'absolute';
                     clonedBlock.style.left = block.style.left;
                     clonedBlock.style.top = block.style.top;
-                    
+
                     makeResizable(clonedBlock);
                     makeDraggable(clonedBlock);
                     addContextMenu(clonedBlock);
-                    
+
                     scheduleContainer.appendChild(clonedBlock);
                 }
-                
+
                 document.addEventListener('mousemove', handleMouseMove);
                 document.addEventListener('mouseup', handleMouseUp);
                 e.preventDefault();
@@ -1384,22 +1570,22 @@
                     const targetBlock = isCtrlPressed || isLongPress ? clonedBlock : block;
                     if (targetBlock) {
                         const timelineRect = timelineContainer.getBoundingClientRect();
-                        
+
                         if (e.clientX >= timelineRect.left && e.clientX <= timelineRect.right &&
                             e.clientY >= timelineRect.top && e.clientY <= timelineRect.bottom) {
-                            
+
                             const mouseX = e.clientX - timelineRect.left + timelineContainer.scrollLeft;
                             const mouseY = e.clientY - timelineRect.top + timelineContainer.scrollTop;
-                            
-                            const column = Math.floor((mouseX - offsetX - timelineX + columnWidth/2) / columnWidth);
+
+                            const column = Math.floor((mouseX - offsetX - timelineX + columnWidth / 2) / columnWidth);
                             const snapLeft = timelineX + (column * columnWidth) + 10;
                             const snapTop = Math.round((mouseY - offsetY - topMargin) / (minuteHeight * 10)) * (minuteHeight * 10) + topMargin;
                             const targetHeight = parseInt(targetBlock.style.height);
 
-                            if (column >= 0 && column < days.length && 
-                                snapTop >= topMargin && 
+                            if (column >= 0 && column < days.length &&
+                                snapTop >= topMargin &&
                                 snapTop + targetHeight <= endHour * hourHeight + topMargin) {
-                                
+
                                 targetBlock.style.left = `${snapLeft}px`;
                                 targetBlock.style.top = `${snapTop}px`;
 
@@ -1424,12 +1610,12 @@
             function handleMouseUp(e) {
                 clearTimeout(longPressTimer);
                 const targetBlock = isCtrlPressed || isLongPress ? clonedBlock : block;
-                
+
                 if (targetBlock) {
                     const isConflict = targetBlock.getAttribute('data-conflict') === 'true';
                     const timelineRect = timelineContainer.getBoundingClientRect();
                     const insideTimeline = e.clientX >= timelineRect.left && e.clientX <= timelineRect.right &&
-                                           e.clientY >= timelineRect.top && e.clientY <= timelineRect.bottom;
+                        e.clientY >= timelineRect.top && e.clientY <= timelineRect.bottom;
 
                     if (insideTimeline && !isConflict) {
                         targetBlock.style.opacity = '1';
@@ -1498,7 +1684,7 @@
                 if (isLongPress && clonedBlock) {
                     const touch = e.changedTouches[0];
                     const timelineRect = timelineContainer.getBoundingClientRect();
-                    
+
                     if (touch.clientX >= timelineRect.left && touch.clientX <= timelineRect.right &&
                         touch.clientY >= timelineRect.top && touch.clientY <= timelineRect.bottom) {
                         clonedBlock.style.opacity = '1';
@@ -1512,7 +1698,7 @@
 
         // 드래그 앤 드롭 이벤트 처리
         scheduleItems.forEach(item => {
-            item.addEventListener('dragstart', function(e) {
+            item.addEventListener('dragstart', function (e) {
                 e.dataTransfer.setData('text/plain', item.getAttribute('data-subject'));
                 // 드래그 이미지의 오프셋을 상단 중앙으로 설정
                 const rect = e.target.getBoundingClientRect();
@@ -1572,14 +1758,14 @@
         }
 
         // 전체 문서(Document) 드래그over 처리 -> 빗금 금지 커서 방지 및 패널 위 드래그 블록 연출
-        document.addEventListener('dragover', function(e) {
+        document.addEventListener('dragover', function (e) {
             if (window.currentDraggingTemplate) {
                 e.preventDefault();
                 e.dataTransfer.dropEffect = 'copy';
 
                 const timelineRect = timelineContainer.getBoundingClientRect();
                 const insideTimeline = e.clientX >= timelineRect.left && e.clientX <= timelineRect.right &&
-                                       e.clientY >= timelineRect.top && e.clientY <= timelineRect.bottom;
+                    e.clientY >= timelineRect.top && e.clientY <= timelineRect.bottom;
 
                 if (!insideTimeline) {
                     removeDragGhost();
@@ -1624,7 +1810,7 @@
             return defaultPalette[index];
         }
 
-        timelineContainer.addEventListener('dragover', function(e) {
+        timelineContainer.addEventListener('dragover', function (e) {
             e.preventDefault();
             e.dataTransfer.dropEffect = 'copy';
             removeGlobalDragGhost();
@@ -1632,7 +1818,7 @@
             const rect = timelineContainer.getBoundingClientRect();
             const x = e.clientX - rect.left + timelineContainer.scrollLeft;
             const y = e.clientY - rect.top + timelineContainer.scrollTop;
-            
+
             const column = Math.floor((x - timelineX) / columnWidth);
             const snapLeft = timelineX + (column * columnWidth) + 10;
             const snapTop = Math.round((y - topMargin) / (minuteHeight * 10)) * (minuteHeight * 10) + topMargin;
@@ -1691,7 +1877,7 @@
             }
         });
 
-        timelineContainer.addEventListener('dragleave', function(e) {
+        timelineContainer.addEventListener('dragleave', function (e) {
             const rect = timelineContainer.getBoundingClientRect();
             if (e.clientX <= rect.left || e.clientX >= rect.right || e.clientY <= rect.top || e.clientY >= rect.bottom) {
                 removeDragGhost();
@@ -1701,7 +1887,7 @@
             }
         });
 
-        timelineContainer.addEventListener('drop', function(e) {
+        timelineContainer.addEventListener('drop', function (e) {
             e.preventDefault();
             removeDragGhost();
             removeGlobalDragGhost();
@@ -1709,19 +1895,19 @@
             const rect = timelineContainer.getBoundingClientRect();
             const x = e.clientX - rect.left + timelineContainer.scrollLeft;
             const y = e.clientY - rect.top + timelineContainer.scrollTop;
-            
+
             const snapTop = Math.round((y - topMargin) / (minuteHeight * 10)) * (minuteHeight * 10) + topMargin;
             const column = Math.floor((x - timelineX) / columnWidth);
             const snapLeft = timelineX + (column * columnWidth) + 10;
 
             const isConflict = checkCollision(null, snapTop, hourHeight, snapLeft);
 
-            if (snapTop >= topMargin && 
-                snapTop + hourHeight <= endHour * hourHeight + topMargin && 
-                column >= 0 && 
+            if (snapTop >= topMargin &&
+                snapTop + hourHeight <= endHour * hourHeight + topMargin &&
+                column >= 0 &&
                 column < days.length &&
                 !isConflict) {
-                
+
                 let dragData = null;
                 try {
                     dragData = JSON.parse(e.dataTransfer.getData('text/plain'));
@@ -1752,14 +1938,14 @@
         window.addEventListener('resize', drawTimelineBase);
 
         // 다른 곳 클릭시 컨텍스트 메뉴 닫기
-        document.addEventListener('click', function(e) {
+        document.addEventListener('click', function (e) {
             if (!e.target.closest('.context-menu')) {
                 removeContextMenu();
             }
         });
 
         // ESC 키로 컨텍스트 메뉴 닫기
-        document.addEventListener('keydown', function(e) {
+        document.addEventListener('keydown', function (e) {
             if (e.key === 'Escape') {
                 removeContextMenu();
             }
@@ -1769,7 +1955,7 @@
         timelineContainer.addEventListener('scroll', removeContextMenu);
 
         // 초기 스크롤 위치 설정 (05:00)
-        window.addEventListener('load', function() {
+        window.addEventListener('load', function () {
             const scrollTo5am = 5 * hourHeight;
             timelineContainer.scrollTop = scrollTo5am;
         });
@@ -1912,7 +2098,7 @@
 
                 // 학습항목 텍스트 컨테이너
                 const textContent = document.createElement('span');
-                
+
                 // 범위량 합계 계산
                 let totalRange = 0;
                 if (item.scopes && item.scopes.length > 0) {
@@ -1920,7 +2106,7 @@
                         return sum + (scope.end - scope.begin + 1);
                     }, 0);
                 }
-                
+
                 textContent.textContent = `${item.itemName} (${item.subjectName}) - ${totalRange}`;
                 div.appendChild(textContent);
 
@@ -1943,7 +2129,7 @@
         function addNewScope(begin = null, end = null) {
             const scopesList = document.getElementById('scopesList');
             const rows = scopesList.getElementsByClassName('scope-row');
-            
+
             // 이전 범위의 end 값을 확인
             let minBegin = 1;
             if (rows.length > 0) {
@@ -1957,10 +2143,10 @@
                 begin = minBegin;
                 end = begin + 1;
             }
-            
+
             const row = document.createElement('tr');
             row.className = 'scope-row';
-            
+
             row.innerHTML = `
                 <td>
                     <input type="number" class="scope-begin" value="${begin}" min="${minBegin}" max="999" required
@@ -1976,15 +2162,15 @@
                     </button>
                 </td>
             `;
-            
+
             scopesList.appendChild(row);
-            
+
             // 입력 필드에 이벤트 리스너 추가
             const beginInput = row.querySelector('.scope-begin');
             const endInput = row.querySelector('.scope-end');
-            
+
             beginInput.addEventListener('input', () => updateEndMin(beginInput, endInput));
-            
+
             // 다음 범위의 begin 최소값 업데이트
             if (rows.length > 0) {
                 updateNextRowMinBegin(row);
@@ -1996,7 +2182,7 @@
             const row = button.closest('.scope-row');
             const nextRow = row.nextElementSibling;
             row.remove();
-            
+
             // 삭제 후 남은 범위들의 최소값 재조정
             const scopesList = document.getElementById('scopesList');
             const rows = scopesList.getElementsByClassName('scope-row');
@@ -2018,7 +2204,7 @@
             const endInput = row.querySelector('.scope-end');
             const beginValue = parseInt(beginInput.value);
             const endValue = parseInt(endInput.value);
-            
+
             if (input.classList.contains('scope-begin')) {
                 // 시작값이 변경된 경우
                 const minBegin = parseInt(beginInput.min);
@@ -2038,7 +2224,7 @@
                     showMessage('끝값은 시작값보다 작을 수 없습니다.');
                 }
             }
-            
+
             // 다음 범위의 최소값 업데이트
             updateNextRowMinBegin(row);
         }
@@ -2050,7 +2236,7 @@
                 const currentEndValue = parseInt(currentRow.querySelector('.scope-end').value);
                 const nextBeginInput = nextRow.querySelector('.scope-begin');
                 const nextEndInput = nextRow.querySelector('.scope-end');
-                
+
                 nextBeginInput.min = currentEndValue + 1;
                 if (parseInt(nextBeginInput.value) <= currentEndValue) {
                     nextBeginInput.value = currentEndValue + 1;
@@ -2138,24 +2324,24 @@
             e.preventDefault();
             const scopesList = document.getElementById('scopesList');
             const rows = scopesList.getElementsByClassName('scope-row');
-            
+
             // 범위가 하나도 없는 경우
             if (rows.length === 0) {
                 showMessage('최소 하나의 학습 범위를 추가해주세요.');
                 return;
             }
-            
+
             // 범위 데이터 수집 및 유효성 검사
             try {
                 const scopes = Array.from(rows).map((row, index) => {
                     const begin = parseInt(row.querySelector('.scope-begin').value);
                     const end = parseInt(row.querySelector('.scope-end').value);
-                    
+
                     // 시작값과 끝값 검사
                     if (end < begin) {
                         throw new Error(`${index + 1}번째 범위의 끝값은 시작값보다 작을 수 없습니다.`);
                     }
-                    
+
                     // 이전 범위와의 관계 검사
                     if (index > 0) {
                         const prevEnd = parseInt(rows[index - 1].querySelector('.scope-end').value);
@@ -2163,10 +2349,10 @@
                             throw new Error(`${index + 1}번째 범위의 시작값은 이전 범위의 끝값(${prevEnd})보다 커야 합니다.`);
                         }
                     }
-                    
+
                     return { begin, end };
                 });
-                
+
                 const subjectVal = document.getElementById('subjectSelect').value;
                 const parsedSubId = parseInt(subjectVal);
                 if (!subjectVal || isNaN(parsedSubId)) {
@@ -2179,10 +2365,10 @@
                     scopes: scopes,
                     tag: document.getElementById('itemTag').value
                 };
-                
+
                 let response;
                 const itemId = document.getElementById('itemId').value;
-                
+
                 if (itemId) {
                     response = await fetch(`/api/items/${itemId}`, {
                         method: 'PUT',
@@ -2199,7 +2385,7 @@
 
                 if (response.ok) {
                     await loadItems();  // 학습항목 목록 새로고침
-                    
+
                     // 시간표의 블록들 업데이트
                     if (itemId) {
                         const blocks = document.querySelectorAll(`.schedule-block[data-item-id="${itemId}"]`);
@@ -2210,7 +2396,7 @@
                             updateScheduleTime(block);
                         });
                     }
-                    
+
                     closeModal();
                     if (itemId) {
                         showNotificationModal('학습항목이 수정되었습니다.');
@@ -2267,12 +2453,12 @@
                         method: 'DELETE'
                     });
                     const result = await response.json();
-                    
+
                     if (result.success) {
                         // 타임라인에서 해당 항목의 모든 블록 삭제
                         const blocks = document.querySelectorAll(`.schedule-block[data-item-id="${itemToDelete}"]`);
                         blocks.forEach(block => block.remove());
-                        
+
                         // 항목 목록 새로고침
                         await loadItems();
                         showNotificationModal('학습항목이 삭제되었습니다.');
@@ -2288,10 +2474,10 @@
         }
 
         // Modify the existing drag and drop handling
-        document.addEventListener('dragover', function(e) {
+        document.addEventListener('dragover', function (e) {
             const trashZone = document.getElementById('trashZone');
             const rect = trashZone.getBoundingClientRect();
-            
+
             if (e.clientX >= rect.left && e.clientX <= rect.right &&
                 e.clientY >= rect.top && e.clientY <= rect.bottom) {
                 e.preventDefault();
@@ -2301,10 +2487,10 @@
             }
         });
 
-        document.addEventListener('drop', function(e) {
+        document.addEventListener('drop', function (e) {
             const trashZone = document.getElementById('trashZone');
             const rect = trashZone.getBoundingClientRect();
-            
+
             if (e.clientX >= rect.left && e.clientX <= rect.right &&
                 e.clientY >= rect.top && e.clientY <= rect.bottom) {
                 e.preventDefault();
@@ -2340,7 +2526,7 @@
         function closeNotificationModal() {
             const modal = document.getElementById('notificationModal');
             modal.style.display = 'none';
-            
+
             // 모달이 닫힐 때 포커스를 적절한 요소로 이동
             const activeElement = document.activeElement;
             if (activeElement && activeElement.blur) {
@@ -2377,7 +2563,7 @@
                     const top = parseInt(block.style.top) - topMargin;
                     const height = parseInt(block.style.height);
                     const itemId = parseInt(block.getAttribute('data-item-id'));
-                    
+
                     // 시작 시간과 끝 시간을 분 단위로 계산
                     const sTime = Math.round(top / minuteHeight);
                     const eTime = Math.round((top + height) / minuteHeight);
@@ -2448,7 +2634,7 @@
                 block.setAttribute('data-item-id', item.id);
                 block.setAttribute('data-subject', item.subjectName);
                 block.setAttribute('data-item-name', item.itemName);
-                
+
                 scheduleContainer.appendChild(block);
                 makeResizable(block);
                 makeDraggable(block);
@@ -2478,7 +2664,7 @@
                 itemName.value = item.itemName;
                 subjectSelect.value = item.subId;
                 itemTag.value = item.tag || '';
-                
+
                 // 기존 범위 추가
                 if (item.scopes && item.scopes.length > 0) {
                     item.scopes.forEach(scope => {
@@ -2497,7 +2683,7 @@
             }
 
             modal.style.display = 'block';
-            
+
             // 항목명 필드 자동 선택
             setTimeout(() => {
                 itemName.focus();
@@ -2516,7 +2702,7 @@
             const messageElement = document.querySelector('.validation-message');
             messageElement.textContent = message;
             messageElement.classList.add('show');
-            
+
             // 3초 후 메시지 숨기기
             setTimeout(() => {
                 messageElement.classList.remove('show');
@@ -2537,10 +2723,10 @@
             try {
                 const response = await fetch(`/api/time_table_lists/${planId}`);
                 const timeTableLists = await response.json();
-                
+
                 const select = document.getElementById('timeTableListSelect');
                 select.innerHTML = '<option value="">시간표 선택</option>';
-                
+
                 timeTableLists.forEach(ttl => {
                     const option = document.createElement('option');
                     option.value = ttl.id;
@@ -2574,7 +2760,7 @@
         }
 
         // Add event listener for time table list selection
-        document.getElementById('timeTableListSelect').addEventListener('change', function(e) {
+        document.getElementById('timeTableListSelect').addEventListener('change', function (e) {
             if (e.target.value) {
                 loadTimeTable(e.target.value);
             }
@@ -2596,7 +2782,7 @@
                     const top = parseInt(block.style.top) - topMargin;
                     const height = parseInt(block.style.height);
                     const itemId = parseInt(block.getAttribute('data-item-id'));
-                    
+
                     const sTime = Math.round(top / minuteHeight);
                     const eTime = Math.round((top + height) / minuteHeight);
 
@@ -2633,4 +2819,5 @@
         document.addEventListener('DOMContentLoaded', loadTimeTableLists);
     </script>
 </body>
-</html> 
+
+</html>

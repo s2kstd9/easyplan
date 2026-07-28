@@ -52,7 +52,7 @@ class LearningPlanList(models.Model):
     tag = models.CharField(max_length=200, blank=True, null=True, db_column='tag')
 
     class Meta:
-        db_table = 'tbLearningPlanList'
+        db_table = 'tbLearningPlanList'         
 
     def __str__(self):
         return self.learningPlanName
